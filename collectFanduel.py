@@ -9,7 +9,7 @@ years = range(2011, 2016)
 weeks = [x+1 for x in range(17)]
 home = os.getcwd()
 home = home[:-10] + 'fanduel/'
-
+row_id = 0
 for y in years:
     os.makedirs(home + ("/%d/" % y))
     os.chdir(home + ("/%d/" % y))
@@ -23,17 +23,18 @@ for y in years:
             datalines = False
             data = []
             for l in lines: 
-            	if l == "</pre>\n":
-            		datalines = False
-            	if datalines: 
-            		l = re.sub(',', '', l)
-            		l = re.sub(' ', '', l)
-            		data.append(l)
-            	if "Semi-colon delimited format" in l: 
-            		datalines = True
+                if l == "</pre>\n":
+                    datalines = False
+                if datalines: 
+                    l = re.sub(',', '', l)
+                    l = re.sub(' ', '', l)
+                    data.append(l)
+                if "Semi-colon delimited format" in l: 
+                    datalines = True
         if len(data) > 1:
-	        with open('week%d.csv' % w, 'w') as f: 
-	        	f.write("Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary\n")
-	        	for d in data: 
-	        		f.write(d)
+            with open('week%d.csv' % w, 'w') as f: 
+                f.write("id;Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary\n")
+                for d in data: 
+                    f.write('%f;'%float(row_id) + d)
+                    row_id += 1
 

@@ -7,7 +7,7 @@ import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
-
+home = os.getcwd()[:-10] + 'fanduel/'
 teams = {'MIN': 'min', 'MIA': 'mia', 'CAR': 'car', 'ATL': 'atl', 'OAK': 'oak', 'CIN': 'cin', 'NYJ': 'nyj', 'DEN': 'den', 'BAL': 'bal', 'NYG': 'nyg', 'TEN': 'ten', 'NO': 'nor', 'DAL': 'dal', 'NE': 'nwe', 'SEA': 'sea', 'CLE': 'cle', 'TB': 'tam', 'PIT': 'pit', 'STL': 'stl', 'DET': 'det', 'HOU': 'hou', 'GB': 'gnb', 'CHI': 'chi', 'WAS': 'was', 'JAC': 'jac', 'KC': 'kan', 'PHI': 'phi', 'BUF': 'buf', 'IND': 'ind', 'ARI': 'ari', 'SF': 'sfo', 'SD': 'sdg'}
 
 defense = {'CardinalsArizona':'ArizonaDefense',
@@ -43,13 +43,13 @@ defense = {'CardinalsArizona':'ArizonaDefense',
             'TitansTennessee':'TennesseeDefense',
             'RedskinsWashington':'WashingtonDefense'}
 
-data = pd.DataFrame.from_csv('2015week3.csv').values
+data = pd.DataFrame.from_csv(home + 'week3.csv').values
 woy = 3
 guru = []
 
 for r in data:
     # Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary
-    w = [woy]                     # week
+    w = [woy]                     # week of year
     w.append(2015)                # year
     w.append(0)                   # ID
     if (r[2] + r[1]) in defense.keys():
@@ -69,8 +69,11 @@ for r in data:
     w.append(teams[r[8]])         # Oppt
     w.append(r[3])                # FD points
     w.append(r[5])
-    guru.append(w)
-with open('2015week3guru.csv', 'w') as f:
+    if r[9] in ['O', 'D', 'IR']:
+        continue
+    else:
+        guru.append(w)
+with open(home + 'week3guru.csv', 'w') as f:
     f.write('Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary\n')
     for line in guru: 
         print line

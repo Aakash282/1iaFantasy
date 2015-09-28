@@ -68,7 +68,7 @@ def anneal(data, iterations):
     else:
       new = r.choice(d.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FD points']
+      newPoints = data.loc[new]['FFPG']
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost

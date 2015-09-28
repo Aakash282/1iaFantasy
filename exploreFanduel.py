@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 def loadData(years):
 	allData = []
 	home = os.getcwd()
+	home = home[:-10] + 'fanduel/'
+	
 	for year in years: 
 		os.chdir(home + "/%d/" % year)
 		files = os.listdir(os.getcwd())
