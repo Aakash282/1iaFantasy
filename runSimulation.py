@@ -14,6 +14,7 @@ data = pd.DataFrame.from_csv(home + 'computedData.csv')
 
 years = data.groupby('Year')
 for year in years: 
-	weeks = year[1].groupby('Week')
-	for week in weeks:
-		anneal(week[1], 10000)
+  weeks = year[1].groupby('Week')
+  for week in weeks:
+    ans = anneal(week[1], 1000)
+    print ans

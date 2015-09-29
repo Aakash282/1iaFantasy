@@ -19,7 +19,7 @@ def anneal(data, iterations):
   for i in range(len(team)):
       ind = team[i]
       costs[i] = data.loc[ind]['FD salary']
-      points[i] = data.loc[ind]['FD points']
+      points[i] = data.loc[ind]['FFPG']
 
   costConstraint = 55000
   totalCost = sum(costs)
@@ -28,7 +28,7 @@ def anneal(data, iterations):
     if change == 0:
       new = r.choice(qb.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FD points']
+      newPoints = data.loc[new]['FFPG']
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -39,7 +39,7 @@ def anneal(data, iterations):
       if new in team[1:3] or new in remove:
         continue
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FD points']
+      newPoints = data.loc[new]['FFPG']
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -50,7 +50,7 @@ def anneal(data, iterations):
       if new in team[3:6] or new in remove:
         continue
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FD points']
+      newPoints = data.loc[new]['FFPG']
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -59,7 +59,7 @@ def anneal(data, iterations):
     elif change < 7:
       new = r.choice(te.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FD points']
+      newPoints = data.loc[new]['FFPG']
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -75,12 +75,14 @@ def anneal(data, iterations):
         points[change] = newPoints
         totalCost = sum(costs)
 
+  res = [''] * len(team)
+  expected = sum(points)
   for i in range(len(team)):
       ind = team[i]
-      print data.loc[ind]['Pos'], data.loc[ind]['Name']
-  print sum(points)
-  print totalCost
-  return team + [sum(points), totalCost]
+      res[i] = data.loc[ind]['Name']
+
+      points[i] = data.loc[ind]['FD points']
+  return res + [expected, sum(points), totalCost]
 
 if __name__ == '__main__':
   data = pd.read_csv(os.getcwd() + '/2015week3guru.csv',sep=';')
