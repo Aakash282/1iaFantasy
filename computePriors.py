@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	data = loadData(range(2011, 2015))
 
 	# Set Hyper Parameters
-	win_size = 5
+	win_size = 12
 
 	# Create Buffers
 	FFPG = [0 for i in range(len(data.values))]
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 		if np.isnan(FFPG[i]):
 			FFPG[i] = 0
 		if np.isnan(price[i]):
-			price[i] = 5000
+			price[i] = 7000
 
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
