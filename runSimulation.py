@@ -21,10 +21,10 @@ for year in years:
   weeks = year[1].groupby('Week')
   if year[0] > 2011:
     for week in weeks:
-      for i in range(20):
+      for i in range(2):
         time.append(year[0] + (float(week[0]) / 18))
         print time[-1]
-        ans = anneal(week[1], 3000)
+        ans = anneal(week[1], 10000)
         print ans
         expected.append(ans[8])
         actual.append(ans[9])
