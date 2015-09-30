@@ -10,7 +10,6 @@ def anneal(data, iterations):
   te = data[data['Pos'] == 'TE']
   pk = data[data['Pos'] == 'PK']
   d = data[data['Pos'] == 'Def']
-
   remove = []
   remove.append(data[data['Name'] == 'WilliamsDeAngelo'].index)
   team = [r.choice(qb.index.values)] + r.sample(rb.index.values,2) + r.sample(wr.index.values,3) + [r.choice(te.index.values)] + [r.choice(d.index.values)]

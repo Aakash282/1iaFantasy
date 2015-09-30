@@ -29,18 +29,17 @@ if __name__ == '__main__':
 	data = loadData(range(2011, 2015))
 
 	# Set Hyper Parameters
-	win_size = 12
+	win_size = 8
 
 	# Create Buffers
 	FFPG = [0 for i in range(len(data.values))]
 	price = [0 for i in range(len(data.values))]
-	players = data.groupby('Name')
+	players = data.groupby(['Name', 'Team', 'Pos'])
 	for player in players: 
 		playerData = player[1].sort(['Year', 'Week'])
-
+		# print playerData
 		total_points = [] 
 		total_salary = []
-		idx = []
 		for row in playerData.iterrows():
 			FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 			price[int(row[0])] = np.mean(total_salary[-win_size:])
@@ -56,7 +55,13 @@ if __name__ == '__main__':
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
 
+	# players = data.groupby(['Name', 'Team'])
+	# for player in players: 
+	# 	playerData = player[1].sort(['Year', 'Week'])
+	# 	print playerData["Name"].values
+	# 	if 'SmithSteve' in playerData['Name'].values:
+	# 		# print playerData
+
 	home = os.getcwd() + '/'
-	print home
 	data.to_csv(home + 'computedData.csv')
 
