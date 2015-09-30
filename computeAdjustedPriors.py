@@ -38,7 +38,7 @@ if __name__ == '__main__':
 	data = loadData(range(2011, 2015))
 
 	# Set Hyper Parameters
-	win_size = 12
+	win_size = 5
 
 	# Create Buffers
 	
@@ -106,19 +106,21 @@ if __name__ == '__main__':
 			year = row[1]['Year']
 			pos = row[1]['Pos']
 
-			print oppt, week, year, pos
+			# print oppt, week, year, pos
 			if oppt == '-':
 				continue
+
+
+			FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+			price[int(row[0])] = np.mean(total_salary[-win_size:])
 
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
 				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
-					print np.mean(total_points[-win_size:]) / oppt[0][i][2 + posMap[pos]-1]
-					FFPG[int(row[0])] = np.mean(total_points[-win_size:]) / oppt[0][i][2 + posMap[pos]-1]
-			price[int(row[0])] = np.mean(total_salary[-win_size:])
-
-			total_points.append(row[1]['FD points'])
+					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
+					total_points.append(row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1])
+					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
 
 	for i in range(len(FFPG)):
@@ -127,6 +129,7 @@ if __name__ == '__main__':
 		if np.isnan(price[i]):
 			price[i] = 7000
 
+	print FFPG
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
 

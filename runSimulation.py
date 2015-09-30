@@ -21,13 +21,31 @@ for year in years:
   weeks = year[1].groupby('Week')
   if year[0] > 2011:
     for week in weeks:
-      for i in range(2):
+      buffExpected, buffActual = [], []
+
+      # runs anneal  X times per week and collects the best runs
+      for i in range(5):
         time.append(year[0] + (float(week[0]) / 18))
         print time[-1]
-        ans = anneal(week[1], 10000)
+
+        # run anneal
+        ans = anneal(week[1], 5000)
         print ans
-        expected.append(ans[8])
-        actual.append(ans[9])
+
+        # save the results of the run
+        buffExpected.append(ans[8])
+        buffActual.append(ans[9])
+        # expected.append(ans[8])
+        # actual.append(ans[9])
+
+      # save the best run of the group
+      bestExpected = 0
+      for i in buffExpected:
+      	if i > bestExpected:
+      		bestExpected = i
+      idx = buffExpected.index(bestExpected)
+      expected.append(buffExpected[idx])
+      actual.append(buffActual[idx])
       best.append(optimal(week[1], 1000)[9])
 
 plt.plot(time, expected, '-b')
