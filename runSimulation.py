@@ -22,14 +22,14 @@ for year in years:
   if year[0] > 2011:
     for week in weeks:
       buffExpected, buffActual = [], []
-
+      time.append(year[0] + (float(week[0]) / 18))
       # runs anneal  X times per week and collects the best runs
       for i in range(5):
-        time.append(year[0] + (float(week[0]) / 18))
+        
         print time[-1]
 
         # run anneal
-        ans = anneal(week[1], 5000)
+        ans = anneal(week[1], 1000)
         print ans
 
         # save the results of the run
