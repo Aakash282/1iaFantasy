@@ -35,7 +35,7 @@ def loadData(years):
 
 if __name__ == '__main__':
 	# Load Data
-	data = loadData(range(2011, 2015))
+	data = loadData(range(2011, 2016))
 
 	# Set Hyper Parameters
 	win_size = 5
@@ -92,14 +92,12 @@ if __name__ == '__main__':
 	priors = np.zeros([len(data.values), 1])
 	FFPG = [0 for i in range(len(data.values))]
 	price = [0 for i in range(len(data.values))]
-        FDVar = [0 for i in range(len(data.values))]
-        players = data.groupby(['Name', 'Team', 'Pos'])
+	players = data.groupby(['Name', 'Team', 'Pos'])
 	for player in players: 
 		playerData = player[1].sort(['Year', 'Week'])
 		# print playerData
 		total_points = [] 
 		total_salary = []
-                unadjusted_points = []
 		for row in playerData.iterrows():
 			
 
@@ -115,29 +113,24 @@ if __name__ == '__main__':
 
 			FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 			price[int(row[0])] = np.mean(total_salary[-win_size:])
-			FDVar[int(row[0])] = np.var(unadjusted_points[-win_size:])
+
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
 				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					# This +1 is used to get rid of the infinities and adjust the metric a bit.  Adhoc
-					total_points.append(row[1]['FD points'] / (oppt[0][i][2 + posMap[pos]-1] + 1))
-                                        unadjusted_points.append(row[1]['FD points'])
-                                        # print oppt[0][i][2 + posMap[pos]-1]
+					total_points.append(row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1])
+					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
-                        
+
 	for i in range(len(FFPG)):
 		if np.isnan(FFPG[i]):
 			FFPG[i] = 0
 		if np.isnan(price[i]):
 			price[i] = 7000
-		if np.isnan(FDVar[i]):
-			FDVar[i] = 0
-	print FFPG
+
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
-        data['FD Variance'] = pd.Series(FDVar)
+
 	home = os.getcwd() + '/'
 	data.to_csv(home + 'computedData.csv')
-

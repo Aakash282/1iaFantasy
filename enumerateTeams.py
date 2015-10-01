@@ -10,7 +10,9 @@ from joblib import Parallel, delayed
 
 def enumerate(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost):
     print q
-    with open('qb/%s.csv' % q, 'w') as f:
+    home = os.getcwd()
+    home = home[:-10] + 'fanduel/'
+    with open(home + 'qb/%s.csv' % q, 'w') as f:
         team = []
         cost = 0
         points = 0
@@ -74,58 +76,70 @@ def enumerate(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCos
             team.pop()
 
 if __name__ == '__main__':
-    data = pd.DataFrame.from_csv('2015week3guru.csv', sep=';')
-    
-    posData = data.groupby('Pos')
+    home = os.getcwd()
+    home = home[:-10] + 'fanduel/'
+    data = pd.DataFrame.from_csv(home + 'computedData.csv')
+
+    # print data
+    year = data[data['Year'] == 2015]
+    # print year
+    week = year[year['Week'] == 4]
+    # print week
+    # week = week[np.isfinite(week['FD points'])]
+    # print week
+
+    posData = week.groupby('Pos')
     pos = [positionData for positionData in posData]
-    defense = pos[0][1].values[:,2]
-    points = pos[0][1].values[:,7]
-    cost = pos[0][1].values[:,8]
+    print pos[0][1].values
+    defense = pos[0][1].values[:,3]
+    # print defense
+    points = pos[0][1].values[:,8]
+    cost = pos[0][1].values[:,9]
     defensePoints = {}
     defenseCost = {}
     for i in range(len(defense)):
         defensePoints[defense[i]] = points[i]
         defenseCost[defense[i]] = cost[i]
 
-    kicker = pos[1][1].values[:,2]
-    points = pos[1][1].values[:,7]
-    cost = pos[1][1].values[:,8]
+    kicker = pos[1][1].values[:,3]
+    points = pos[1][1].values[:,8]
+    cost = pos[1][1].values[:,9]
     kickerPoints = {}
     kickerCost = {}
     for i in range(len(kicker)):
         kickerPoints[kicker[i]] = points[i]
         kickerCost[kicker[i]] = cost[i]
 
-    qb = pos[2][1].values[0:25,2]
-    points = pos[2][1].values[:,7]
-    cost = pos[2][1].values[:,8]
+    qb = pos[2][1].values[0:25,3]
+    points = pos[2][1].values[:,8]
+    cost = pos[2][1].values[:,9]
     qbPoints = {}
     qbCost = {}
     for i in range(len(qb)):
         qbPoints[qb[i]] = points[i]
         qbCost[qb[i]] = cost[i]
 
-    rb = pos[3][1].values[0:25,2]
-    points = pos[3][1].values[:,7]
-    cost = pos[3][1].values[:,8]
+    rb = pos[3][1].values[0:25,3]
+    points = pos[3][1].values[:,8]
+    cost = pos[3][1].values[:,9]
     rbPoints = {}
     rbCost = {}
     for i in range(len(rb)):
         rbPoints[rb[i]] = points[i]
         rbCost[rb[i]] = cost[i]
 
-    te = pos[4][1].values[0:12,2]
-    points = pos[4][1].values[:,7]
-    cost = pos[4][1].values[:,8]
+    te = pos[4][1].values[0:12,3]
+    points = pos[4][1].values[:,8]
+    cost = pos[4][1].values[:,9]
     tePoints = {}
     teCost = {}
     for i in range(len(te)):
         tePoints[te[i]] = points[i]
         teCost[te[i]] = cost[i]
 
-    wr = pos[5][1].values[0:45,2]
-    points = pos[5][1].values[:,7]
-    cost = pos[5][1].values[:,8]
+    wr = pos[5][1].values[0:45,3]
+    points = pos[5][1].values[:,8]
+    cost = pos[5][1].values[:,9]
     wrPoints = {}
     wrCost = {}
     for i in range(len(wr)):
