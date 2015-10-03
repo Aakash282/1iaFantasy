@@ -119,7 +119,14 @@ if __name__ == '__main__':
 				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					total_points.append(row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1])
+					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
+							  'PK'  : oppt[0][i][posMap[pos]-1]/4.0,
+							  'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
+							  'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
+							  'TE'  : oppt[0][i][posMap[pos]-1]/4.0,
+							  'WR'  : oppt[0][i][posMap[pos]-1]/6.0}
+					
+					total_points.append(row[1]['FD points'] + adjMap[pos])
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
 
