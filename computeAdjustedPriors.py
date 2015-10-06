@@ -6,6 +6,10 @@ import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
+
+# boolean for if we use a straight mean or an exponential weighted moving avg.
+EWMA = False
+
 posMap = {'Def' : 1,
 		  'PK'  : 2,
 		  'QB'  : 3,
@@ -93,11 +97,13 @@ if __name__ == '__main__':
 	FFPG = [0 for i in range(len(data.values))]
 	price = [0 for i in range(len(data.values))]
 	players = data.groupby(['Name', 'Team', 'Pos'])
+	FDStd = [0 for i in range(len(data.values))]
 	for player in players: 
 		playerData = player[1].sort(['Year', 'Week'])
 		# print playerData
 		total_points = [] 
 		total_salary = []
+		unadjusted_points = []
 		for row in playerData.iterrows():
 			
 
@@ -111,9 +117,17 @@ if __name__ == '__main__':
 				continue
 
 
-			FFPG[int(row[0])] = np.mean(total_points[-win_size:])
-			price[int(row[0])] = np.mean(total_salary[-win_size:])
-
+			#FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+			if len(total_points) == 0 or not EWMA:
+				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+				price[int(row[0])] = np.mean(total_salary[-win_size:])
+				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
+			elif EWMA:
+				FFPG[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
+				price[int(row[0])] = pd.ewma(pd.Series(total_salary), span = win_size).values[-1]
+				price[int(row[0])] = pd.ewmstd(pd.Series(unadjusted_points), span = win_size).values[-1]
+				
+			
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
 				# print oppt[0][i]
@@ -129,15 +143,21 @@ if __name__ == '__main__':
 					total_points.append(row[1]['FD points'] + adjMap[pos])
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
-
+			unadjusted_points.append(row[1]['FD points'])
 	for i in range(len(FFPG)):
 		if np.isnan(FFPG[i]):
 			FFPG[i] = 0
 		if np.isnan(price[i]):
 			price[i] = 7000
+		if np.isnan(FDStd[i]):
+			# Set to 0 to not give any false ceiling readings
+			FDStd[i] = 0
 
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
+	data['Std FFPG'] = pd.Series(FDStd)
+	data['Floor'] =  data['FFPG'] - data['Std FFPG']
+	data['Ceiling'] = data['FFPG'] + data['Std FFPG']
 
 	home = os.getcwd() + '/'
 	data.to_csv(home + 'computedData.csv')
