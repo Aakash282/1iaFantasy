@@ -43,13 +43,15 @@ defense = {'CardinalsArizona':'ArizonaDefense',
             'TitansTennessee':'TennesseeDefense',
             'RedskinsWashington':'WashingtonDefense'}
 
-data = pd.DataFrame.from_csv(home + 'week4.csv').values
-woy = 4
+data = pd.DataFrame.from_csv(home + 'week5.csv').values
+woy = 5
 guru = []
-
+c = 31176.0
 for r in data:
     # Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary
-    w = [woy]                     # week of year
+    if r[9] in ['O', 'D', 'IR']:
+        continue
+    w = [c, woy]                  # row and week of year
     w.append(2015)                # year
     w.append(0)                   # ID
     if (r[2] + r[1]) in defense.keys():
@@ -69,12 +71,10 @@ for r in data:
     w.append(teams[r[8]])         # Oppt
     w.append(r[3])                # FD points
     w.append(r[5])
-    if r[9] in ['O', 'D', 'IR']:
-        continue
-    else:
-        guru.append(w)
+    c += 1
+    guru.append(w)
 home = os.getcwd()[:-10] + 'fanduel/'
-with open(home + 'week4guru.csv', 'w') as f:
+with open(home + 'week5guru.csv', 'w') as f:
     f.write('Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary\n')
     for line in guru: 
         print line

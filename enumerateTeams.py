@@ -86,7 +86,7 @@ if __name__ == '__main__':
     # print data
     year = data[data['Year'] == 2015]
     # print year
-    week = year[year['Week'] == 4]
+    week = year[year['Week'] == 5]
     # print week
     # week = week[np.isfinite(week['FD points'])]
     # print week

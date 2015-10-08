@@ -3,10 +3,10 @@ import numpy as np
 import os
 import random as r
 
-global columnn_max
-column_max = 'Ceiling'
+# global column_max
+# column_max = 'FFPG'
 
-def anneal(data, iterations):
+def anneal(data, iterations, column_max):
   qb = data[data['Pos'] == 'QB']
   rb = data[data['Pos'] == 'RB']
   wr = data[data['Pos'] == 'WR']
@@ -173,5 +173,5 @@ if __name__ == '__main__':
   data = data[data['Year'] == 2015]
   data = data[data['Week'] == 5]
   for i in range(10):
-      print anneal(data, 5000)
+      print anneal(data, 5000, 'FFPG')
   

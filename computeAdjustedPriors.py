@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 
 # boolean for if we use a straight mean or an exponential weighted moving avg.
-EWMA = False
+EWMA = True
 
 posMap = {'Def' : 1,
 		  'PK'  : 2,
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	data = loadData(range(2011, 2016))
 
 	# Set Hyper Parameters
-	win_size = 2
+	win_size = 5
 
 	# Create Buffers
 	
