@@ -172,6 +172,6 @@ if __name__ == '__main__':
   
   data = data[data['Year'] == 2015]
   data = data[data['Week'] == 5]
-  for i in range(10):
-      print anneal(data, 5000, 'FFPG')
+  for i in range(20):
+      print anneal(data, 5000, 'Ceiling')
   

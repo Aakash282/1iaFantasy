@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 
 # boolean for if we use a straight mean or an exponential weighted moving avg.
-EWMA = True
+EWMA = False
 
 posMap = {'Def' : 1,
 		  'PK'  : 2,
