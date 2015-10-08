@@ -3,6 +3,9 @@ import numpy as np
 import os
 import random as r
 
+global columnn_max
+column_max = 'Ceiling'
+
 def anneal(data, iterations):
   qb = data[data['Pos'] == 'QB']
   rb = data[data['Pos'] == 'RB']
@@ -27,7 +30,7 @@ def anneal(data, iterations):
     if change == 0:
       new = r.choice(qb.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FFPG']
+      newPoints = data.loc[new][column_max]
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -38,7 +41,7 @@ def anneal(data, iterations):
       if new in team[1:3] or new in remove:
         continue
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FFPG']
+      newPoints = data.loc[new][column_max]
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -49,7 +52,7 @@ def anneal(data, iterations):
       if new in team[3:6] or new in remove:
         continue
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FFPG']
+      newPoints = data.loc[new][column_max]
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -58,7 +61,7 @@ def anneal(data, iterations):
     elif change < 7:
       new = r.choice(te.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FFPG']
+      newPoints = data.loc[new][column_max]
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -67,7 +70,7 @@ def anneal(data, iterations):
     else:
       new = r.choice(d.index.values)
       newCost = data.loc[new]['FD salary']
-      newPoints = data.loc[new]['FFPG']
+      newPoints = data.loc[new][column_max]
       if totalCost - costs[change] + newCost < costConstraint and newPoints > points[change]:
         team[change] = new
         costs[change] = newCost
@@ -165,5 +168,10 @@ def optimal(data, iterations):
   return res + [expected, sum(points), totalCost]
 
 if __name__ == '__main__':
-  data = pd.read_csv(os.getcwd() + '/2015week3guru.csv',sep=';')
-  anneal(data, 10000)
+  data = pd.read_csv(os.getcwd()[:-10] + 'fanduel/computedData.csv',sep=',')
+  
+  data = data[data['Year'] == 2015]
+  data = data[data['Week'] == 5]
+  for i in range(10):
+      print anneal(data, 5000)
+  

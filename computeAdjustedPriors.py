@@ -15,7 +15,7 @@ posMap = {'Def' : 1,
 		  'QB'  : 3,
 		  'RB'  : 4,
 		  'TE'  : 5,
-		  'WR'  : 6,}
+		  'WR'  : 6}
 
 defenseMap = {}
 def loadData(years):
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	data = loadData(range(2011, 2016))
 
 	# Set Hyper Parameters
-	win_size = 5
+	win_size = 2
 
 	# Create Buffers
 	
@@ -133,13 +133,16 @@ if __name__ == '__main__':
 				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
-							  'PK'  : oppt[0][i][posMap[pos]-1]/4.0,
-							  'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
-							  'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
-							  'TE'  : oppt[0][i][posMap[pos]-1]/4.0,
-							  'WR'  : oppt[0][i][posMap[pos]-1]/6.0}
 					
+					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
+					          'PK'  : oppt[0][i][posMap[pos]-1]/4.0,
+					          'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
+					          'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
+					          'TE'  : oppt[0][i][posMap[pos]-1]/4.0,
+					          'WR'  : oppt[0][i][posMap[pos]-1]/6.0}
+					#print adjMap
+					#if pos == 'PK':
+					#	print posMap[pos]
 					total_points.append(row[1]['FD points'] + adjMap[pos])
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
@@ -160,4 +163,11 @@ if __name__ == '__main__':
 	data['Ceiling'] = data['FFPG'] + data['Std FFPG']
 
 	home = os.getcwd() + '/'
+	
+	
+	'''
+	data = data[['Week', 'Year', 'GID', 'Name', 'Pos', 'Team', 'h/a', 'Oppt', \
+	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
+	             'Std FFPG', 'Floor', 'Ceiling']]
+	''' 
 	data.to_csv(home + 'computedData.csv')

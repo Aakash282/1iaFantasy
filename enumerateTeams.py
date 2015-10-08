@@ -79,7 +79,10 @@ if __name__ == '__main__':
     home = os.getcwd()
     home = home[:-10] + 'fanduel/'
     data = pd.DataFrame.from_csv(home + 'computedData.csv')
-
+    
+    corr = pd.DataFrame.from_csv(home + 'pointcorr.csv')
+    # elements of the correlation matrix can be accessed like a 2d array:
+    # corr['T1K']['T2K'] = corr['T2K']['T1K'] (by symmetry)
     # print data
     year = data[data['Year'] == 2015]
     # print year
@@ -113,6 +116,7 @@ if __name__ == '__main__':
     qb = pos[2][1].values[0:25,3]
     points = pos[2][1].values[:,8]
     cost = pos[2][1].values[:,9]
+    print qb
     qbPoints = {}
     qbCost = {}
     for i in range(len(qb)):
@@ -152,3 +156,5 @@ if __name__ == '__main__':
     num_cores = max(num_cores, 1)
 
     Parallel(n_jobs = num_cores)(delayed(enumerate)(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost) for q in qb)
+
+
