@@ -5,7 +5,7 @@ import numpy as np
 # just a testing example to use
 test_lst = ['DaltonAndy', 'EllingtonAndre', 'FreemanDevonta', 'RobinsonAllen', 'MaclinJeremy', 'FitzgeraldLarry', 'EifertTyler']
 
-def teamVariance(player_list):
+def teamStd(player_list):
     '''finds the total std of a portfolio including the correlations.  
     Makes the assumption that all receives are 'WR1' instead of 'WR2'.  This will
     cause weird problems potentially if two people from the same team in the same
