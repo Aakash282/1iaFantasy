@@ -3,7 +3,8 @@ import random as rand
 
 lst = []
 for i in range(300):
-    lst.append(rand.random())
+    lst.append(i + rand.random())
 a = arimaModel.ARIMA(lst, (2, 1, 1))
-d = a.predict(300, 301)
+c = arimaModel.ARIMA.fit(a)
+d = c.forecast(steps = 1)
 print d
