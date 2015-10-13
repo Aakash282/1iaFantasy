@@ -80,13 +80,13 @@ if __name__ == '__main__':
     home = home[:-10] + 'fanduel/'
     data = pd.DataFrame.from_csv(home + 'computedData.csv')
     
-    corr = pd.DataFrame.from_csv(home + 'pointcorr.csv')
+    # corr = pd.DataFrame.from_csv(home + 'pointcorr.csv')
     # elements of the correlation matrix can be accessed like a 2d array:
     # corr['T1K']['T2K'] = corr['T2K']['T1K'] (by symmetry)
     # print data
     year = data[data['Year'] == 2015]
     # print year
-    week = year[year['Week'] == 5]
+    week = year[year['Week'] == 6]
     # print week
     # week = week[np.isfinite(week['FD points'])]
     # print week
