@@ -6,9 +6,12 @@ import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
+import arimatest as arima
+import random as rand
 
 # boolean for if we use a straight mean or an exponential weighted moving avg.
 EWMA = False
+ARIMA = True
 
 posMap = {'Def' : 1,
 		  'PK'  : 2,
@@ -95,6 +98,9 @@ if __name__ == '__main__':
 
 	priors = np.zeros([len(data.values), 1])
 	FFPG = [0 for i in range(len(data.values))]
+	FFPG_low = [0 for i in range(len(data.values))]
+	FFPG_high= [0 for i in range(len(data.values))]
+	
 	price = [0 for i in range(len(data.values))]
 	players = data.groupby(['Name', 'Team', 'Pos'])
 	FDStd = [0 for i in range(len(data.values))]
@@ -118,14 +124,38 @@ if __name__ == '__main__':
 
 
 			#FFPG[int(row[0])] = np.mean(total_points[-win_size:])
-			if len(total_points) == 0 or not EWMA:
+			if EWMA and len(total_points) > 0:
+				FFPG[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
+				price[int(row[0])] = pd.ewma(pd.Series(total_salary), span = win_size).values[-1]
+				FDStd[int(row[0])] = pd.ewmstd(pd.Series(unadjusted_points), span = win_size).values[-1]
+			# ARIMA models need at least 6 points to adequately fit the data
+			elif ARIMA and len(total_points) >= 10 and np.mean(total_points) > 10:
+				cmdString = '{'
+				for elem in total_points:
+					cmdString += str(elem) + ','
+				cmdString = cmdString[:-1]
+				cmdString += '}'
+				command = '/usr/local/bin/MathematicaScript -script ~/FSA/1iaFantasy/mathTimeseries.sh %s' %cmdString
+				
+				output = os.popen(command).read().split('\n')
+				print output
+				output = output[0:3]
+				if output[0] > 600 or output[0] < 0:
+					FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+				else:
+					FFPG[int(row[0])] = output[0]				
+					FFPG_low[int(row[0])] = output[1]
+					FFPG_high[int(row[0])] = output[2]
+
+				price[int(row[0])] = np.mean(total_salary[-win_size:])
+				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
+
+
+			else:
 				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
-			elif EWMA:
-				FFPG[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
-				price[int(row[0])] = pd.ewma(pd.Series(total_salary), span = win_size).values[-1]
-				price[int(row[0])] = pd.ewmstd(pd.Series(unadjusted_points), span = win_size).values[-1]
+				
 				
 			
 			oppt = defenseMap[oppt]
@@ -159,9 +189,13 @@ if __name__ == '__main__':
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
 	data['Std FFPG'] = pd.Series(FDStd)
+	if ARIMA:
+		data['FFPGLow'] = pd.Series(FFPG_low)
+		data['FFPGHigh'] = pd.Series(FFPG_high)
+	'''
 	data['Floor'] =  data['FFPG'] - data['Std FFPG']
 	data['Ceiling'] = data['FFPG'] + data['Std FFPG']
-
+	'''
 	home = os.getcwd() + '/'
 	
 	
@@ -170,4 +204,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedData.csv')
+	data.to_csv(home + 'computedDataewma.csv')
