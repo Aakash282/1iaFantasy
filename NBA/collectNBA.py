@@ -18,7 +18,8 @@ years = range(2014, 2015)
 months = [1, 2, 3, 4, 5, 6, 10, 11, 12] 
 # setting up directory for where data will be stored
 home = os.getcwd()
-home = home[:-10] + 'fanduel/NBA'
+print home
+home = home[:-14] + '/fanduel/NBA'
 
 # iterating over the years for which data will be collected
 for y in years:
