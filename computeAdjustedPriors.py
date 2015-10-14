@@ -14,11 +14,11 @@ EWMA = False
 ARIMA = True
 
 posMap = {'Def' : 1,
-		  'PK'  : 2,
-		  'QB'  : 3,
-		  'RB'  : 4,
-		  'TE'  : 5,
-		  'WR'  : 6}
+          'PK'  : 2,
+          'QB'  : 3,
+          'RB'  : 4,
+          'TE'  : 5,
+          'WR'  : 6}
 
 defenseMap = {}
 def loadData(years):
@@ -129,19 +129,28 @@ if __name__ == '__main__':
 				price[int(row[0])] = pd.ewma(pd.Series(total_salary), span = win_size).values[-1]
 				FDStd[int(row[0])] = pd.ewmstd(pd.Series(unadjusted_points), span = win_size).values[-1]
 			# ARIMA models need at least 6 points to adequately fit the data
-			elif ARIMA and len(total_points) >= 10 and np.mean(total_points) > 10:
+			elif ARIMA and len(total_points) >= 6 and np.mean(total_points) > 10:
+				# the input mathematica string needs to be 
+				# formatted like {a,b,c}
 				cmdString = '{'
 				for elem in total_points:
 					cmdString += str(elem) + ','
 				cmdString = cmdString[:-1]
 				cmdString += '}'
+				# calls the mathematica script
 				command = '/usr/local/bin/MathematicaScript -script ~/FSA/1iaFantasy/mathTimeseries.sh %s' %cmdString
-				
+				# reads the output of the mathematica script
+				# that is printed to the terminal
 				output = os.popen(command).read().split('\n')
 				print output
-				output = output[0:3]
+				print 'confidence interval', output[1], output[2]
+				# cuts off the last entry, which is just ''
+				output = [float(x) for x in output[0:3]]
 				if output[0] > 600 or output[0] < 0:
 					FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+					FFPG_low[int(row[0])] = 0.1
+					FFPG_high[int(row[0])] = 0.1
+					
 				else:
 					FFPG[int(row[0])] = output[0]				
 					FFPG_low[int(row[0])] = output[1]
@@ -149,23 +158,19 @@ if __name__ == '__main__':
 
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
-
-
+				
 			else:
 				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
 				
-				
-			
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
 				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					
 					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
-					          'PK'  : oppt[0][i][posMap[pos]-1]/4.0,
+					          'PK'  : oppt[0][i][posMap[pos]-1]/100.0,
 					          'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
 					          'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
 					          'TE'  : oppt[0][i][posMap[pos]-1]/4.0,
@@ -189,9 +194,8 @@ if __name__ == '__main__':
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
 	data['Std FFPG'] = pd.Series(FDStd)
-	if ARIMA:
-		data['FFPGLow'] = pd.Series(FFPG_low)
-		data['FFPGHigh'] = pd.Series(FFPG_high)
+	data['FFPGLow'] = pd.Series(FFPG_low)
+	data['FFPGHigh'] = pd.Series(FFPG_high)
 	'''
 	data['Floor'] =  data['FFPG'] - data['Std FFPG']
 	data['Ceiling'] = data['FFPG'] + data['Std FFPG']
@@ -204,4 +208,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedDataewma.csv')
+	data.to_csv(home + 'computedDataarima.csv')
