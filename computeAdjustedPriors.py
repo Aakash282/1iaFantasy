@@ -6,7 +6,6 @@ import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
-import arimatest as arima
 import random as rand
 
 # boolean for if we use a straight mean or an exponential weighted moving avg.
@@ -170,7 +169,7 @@ if __name__ == '__main__':
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
 					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
-					          'PK'  : oppt[0][i][posMap[pos]-1]/100.0,
+					          'PK'  : oppt[0][i][posMap[pos]-1]/10.0,
 					          'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
 					          'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
 					          'TE'  : oppt[0][i][posMap[pos]-1]/4.0,

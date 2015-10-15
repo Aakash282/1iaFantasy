@@ -171,7 +171,7 @@ if __name__ == '__main__':
   data = pd.read_csv(os.getcwd()[:-10] + 'fanduel/computedData.csv',sep=',')
   
   data = data[data['Year'] == 2015]
-  data = data[data['Week'] == 5]
+  data = data[data['Week'] == 6]
   for i in range(20):
-      print anneal(data, 5000, 'Ceiling')
+      print anneal(data, 5000, 'FFPG')
   

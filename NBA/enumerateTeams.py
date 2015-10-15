@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 import multiprocessing
 from joblib import Parallel, delayed
 
-
 def enumerate(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost):
     print q
     home = os.getcwd()
@@ -76,7 +75,6 @@ def enumerate(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCos
             points -= rbPoints[r]
             team.pop()
 
-       
 if __name__ == '__main__':
     home = os.getcwd()
     home = home[:-10] + 'fanduel/'
@@ -96,31 +94,67 @@ if __name__ == '__main__':
     posData = week.groupby('Pos')
     pos = [positionData for positionData in posData]
     print pos[0][1].values
-    choices = {}
-    positionPoints = {}
-    positionCost = {}
-    position_map = {'def': 0, 'kick': 1, 'qb' : 2, 'rb': 3, 'te' : 4, 'wr' : 5}
-    position_len_map = {'qb' : 10, 'rb': 15, 'te' : 10, 'wr' : 20}
-    for position in ['def', 'kick', 'qb', 'rb', 'te', 'wr']:
-        # choices are the players/defenses that can be chosen
-        if position in ['qb', 'rb', 'te', 'wr']:
-            choices[position] = pos[position_map[position]][1].values[0:position_len_map[position],3]             
-        else:
-            choices[position] = pos[position_map[position]][1].values[:,3]             
-        points = pos[position_map[position]][1].values[:,8]
-        cost = pos[position_map[position]][1].values[:,9]
-        positionPoints[position] = {}
-        positionCost[position] = {}
-        for i in range(len(choices[position])):
-            positionPoints[position][choices[position][i]] = points[i]
-            positionCost[position][choices[position][i]] = cost[i]
-            
+    defense = pos[0][1].values[:,3]
+    # print defense
+    points = pos[0][1].values[:,8]
+    cost = pos[0][1].values[:,9]
+    defensePoints = {}
+    defenseCost = {}
+    for i in range(len(defense)):
+        defensePoints[defense[i]] = points[i]
+        defenseCost[defense[i]] = cost[i]
+
+    kicker = pos[1][1].values[:,3]
+    points = pos[1][1].values[:,8]
+    cost = pos[1][1].values[:,9]
+    kickerPoints = {}
+    kickerCost = {}
+    for i in range(len(kicker)):
+        kickerPoints[kicker[i]] = points[i]
+        kickerCost[kicker[i]] = cost[i]
+
+    qb = pos[2][1].values[0:25,3]
+    points = pos[2][1].values[:,8]
+    cost = pos[2][1].values[:,9]
+    print qb
+    qbPoints = {}
+    qbCost = {}
+    for i in range(len(qb)):
+        qbPoints[qb[i]] = points[i]
+        qbCost[qb[i]] = cost[i]
+
+    rb = pos[3][1].values[0:25,3]
+    points = pos[3][1].values[:,8]
+    cost = pos[3][1].values[:,9]
+    rbPoints = {}
+    rbCost = {}
+    for i in range(len(rb)):
+        rbPoints[rb[i]] = points[i]
+        rbCost[rb[i]] = cost[i]
+
+    te = pos[4][1].values[0:12,3]
+    points = pos[4][1].values[:,8]
+    cost = pos[4][1].values[:,9]
+    tePoints = {}
+    teCost = {}
+    for i in range(len(te)):
+        tePoints[te[i]] = points[i]
+        teCost[te[i]] = cost[i]
+
+    wr = pos[5][1].values[0:45,3]
+    points = pos[5][1].values[:,8]
+    cost = pos[5][1].values[:,9]
+    wrPoints = {}
+    wrCost = {}
+    for i in range(len(wr)):
+        wrPoints[wr[i]] = points[i]
+        wrCost[wr[i]] = cost[i]
+
     # the -1 is because I like to use my computer while running things
     num_cores = multiprocessing.cpu_count() - 1
     # to ensure that at least one core is being used
     num_cores = max(num_cores, 1)
-    Parallel(n_jobs = num_cores)(delayed(enumerate)(q, choices['rb'], choices['te'], \
-    choices['wr'], positionPoints['qb'], positionCost['qb'], positionPoints['rb'], positionCost['rb'], positionPoints['te'],\
-    positionCost['te'], positionPoints['wr'], positionCost['wr']) for q in choices['qb'])
+
+    Parallel(n_jobs = num_cores)(delayed(enumerate)(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost) for q in qb)
 
 
