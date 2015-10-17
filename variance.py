@@ -3,7 +3,51 @@ import pandas as pd
 import numpy as np
 
 lst = ['DaltonAndy', 'EllingtonAndre', 'FreemanDevonta', 'RobinsonAllen', 'MaclinJeremy', 'FitzgeraldLarry', 'EifertTyler']
-lst1 = ['BenjaminTravis', 'FitzgeraldLarry', 'JonesJames', 'FreemanDevonta', 'GronkowskiRob', 'DaltonAndy', 'LewisDion']
+lst1 = ['BenjaminTravis', 'FitzgeraldLarry', 'JonesJames', "BellLe'Veon", 'GronkowskiRob', 'DaltonAndy', 'LewisDion']
+lst2 = ['BenjaminTravis', 'FitzgeraldLarry', 'JonesJames', "BellLe'Veon", 'GronkowskiRob', 'BradyTom', 'LewisDion']
+
+
+def percExpected(playerList, table):
+    out = []
+    for player in playerList:
+        tempTable = filter_table(table, 'Name', player)
+        out.append(tempTable['FFPG'].values[-1])
+    out = [x / float(sum(out)) for x in out]
+    return out
+
+def corrMatr(teamLists):
+    '''Makes a rough correlation matrix from a list of possible teams.  
+    It is NOT symmetric.  Is this a problem/how to fix'''
+    size = range(len(teamLists))
+    correlations = np.zeros((len(teamLists), len(teamLists)))
+    for i in size:
+        for j in size:
+            correlations[i][j] = teamCorr(teamLists[i], teamLists[j])
+    # this is a way to forceably make the matrix symmetric    
+    print (correlations + np.transpose(correlations)) / 2.0
+    return correlations
+
+def teamCorr(list1, list2):
+    '''Tries to form a correlation between two teams.  Uses the expected number
+    of points'''
+    if list1 == list2:
+        return 1
+    home = os.getcwd()
+    path = home[:-10] + 'fanduel/computedData.csv'
+    # this is the data we want from the upcoming week.  This is used to 
+    # determine which teams are competing
+    data = pd.DataFrame.from_csv(path, sep = ',')
+    data = filter_table(data, 'Week', 6)
+    data = filter_table(data, 'Year', 2015)
+    percExpected1 = percExpected(list1, data)
+    # percExpected2 = percExpected(list2, data)
+    corr = 0
+    for player in list1:
+        if player in list2:
+            corr += percExpected1[list1.index(player)]
+    return corr
+
+
 def teamStd(player_list):
     '''finds the total std of a portfolio including the correlations.  
     Makes the assumption that all receives are 'WR1' instead of 'WR2'.  This will
@@ -11,7 +55,7 @@ def teamStd(player_list):
     position are chosen (ie, 2 rbs or 2 wrs)'''
     
     home = os.getcwd()
-    path = home[:-10] + 'fanduel/2015/week5.csv'
+    path = home[:-10] + 'fanduel/2015/week6.csv'
     # this is the data we want from the upcoming week.  This is used to 
     # determine which teams are competing
     data = pd.DataFrame.from_csv(path, sep = ';')
@@ -82,7 +126,7 @@ def teamStd(player_list):
             portfolioVector[posMap[player[1]]] = playerData['Std FFPG'].values[0]
             totalVariance -= playerData['Std FFPG'].values[0] ** 2
             for player in team2:
-                playerData = filter_table(computedData, 'Name', player[0])            
+                playerData = filter_table(computedData, 'Name', player[0])          
                 portfolioVector[posMap[player[1]] + 9] = playerData['Std FFPG'].values[0]
                 totalVariance -= playerData['Std FFPG'].values[0] ** 2
             print portfolioVector
