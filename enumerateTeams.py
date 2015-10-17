@@ -34,7 +34,7 @@ def combinePositions(list1, list2, score):
     return largerlist
 
 def enumerated(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost):  
-    qbs = combinePositions(ChooseN(wr, wrPoints, wrCost, 3), ChooseN(rb, rbPoints, rbCost, 2), 100) 
+    qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 100) 
     print len(qbs)
     qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 110)    
     print len(qbs)
