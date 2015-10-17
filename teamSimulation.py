@@ -7,7 +7,23 @@ import os
 import pandas as pd
 
 
-a = ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'HopkinsDeAndre', 'DiggsStefon', 'FitzgeraldLarry', 'GatesAntonio','WalshBlair', 'CarolinaDefense']
+a = ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'HopkinsDeAndre', 'DiggsStefon', 'FitzgeraldLarry', 'GatesAntonio', 'CarolinaDefense']
+
+
+def genTeams():
+    
+    for positions in position:
+        
+def genPosition():
+    pvals = [x / 45.0 for x in range(10)]
+    return np.random.multinomial(1, pvals)
+    
+
+
+
+
+
+
 def simulateTeam(team, n):
     ''' this is an example of how we can model the performance of various teams
     each of the players has a high and low range in their confidence interval 
@@ -28,14 +44,44 @@ def simulateTeam(team, n):
     for i in range(n):
         score = 0
         for scores in playerscores:
-            # should use a different distribution to pull from than uniform rand
-            score += scores['FFPGLow'] + rand.random() * scores['FFPGDiff'] 
+            # the VonMises distribution is limitted between [-Pi, Pi], and in 
+            # this case centered at 0.  It has a normal-like distribution near
+            # its mean.  It's nearly equivalent to a normal(0, .5)
+            score += scores['FFPG'] + \
+                abs(scores['FFPGDiff']/2.0 + .01) * np.random.vonmises(0, 5) 
         scoreList.append(score)
     plt.hist(scoreList, int(n ** (1/3.0)))
     return scoreList
     print sum(np.array(scoreList) > 180) / float(n)
     print max(scoreList)
+    print sum(np.array(scoreList) > 110) / float(n)
     
+    
+def expectedPayoff(background, lineupscores, contest):
+    '''Finds the expected value of entering a specific contest and the prob
+    of winning any money'''
+    expected = 0
+    backrand = []
+    inMoney = 0
+    lineupscores = np.array(lineupscores)
+    for i in range(229884):
+        backrand.append(rand.choice(background))
+    backrand.sort()
+    for rank in payoutStructure(contest, '').keys():
+        rank = rank.split(' ') 
+        if len(rank) == 1:
+            rank = int(rank[0])
+            count = ((lineupscores >= backrand[-rank]) & (lineupscores <= backrand[-(rank + 1)])).sum()
+            expected +=  count * payoutStructure(contest, rank)
+            inMoney += count
+        elif len(rank) == 2:
+            rank = [int(x) for x in rank]
+            count = ((backrand[-rank[1]] < lineupscores) & (backrand[-rank[0] + 1] >= lineupscores)).sum() 
+            expected += count * payoutStructure(contest, rank[0])
+            inMoney += count
+    norm = float(len(lineupscores))
+    return expected / norm, inMoney / norm
+                
 def payoutStructure(contest, rank):
     rank = str(rank)
     # cost of the million dollar contest is $25 and there are 229,885 entries
@@ -68,6 +114,8 @@ def payoutStructure(contest, rank):
                      '3301 4100':50, '4101 5000':40, '5001 6000':30, \
                      '6001 7500':25, '7501 10000':20, '10001 13000':15, \
                      '13001 30000':12, '30001 90800':10}}
+    if rank == '':
+        return payoffs[contest]
     for elem in payoffs[contest].keys():
         vals = elem.split(' ')
         if len(vals) == 1:
