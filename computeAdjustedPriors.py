@@ -10,7 +10,7 @@ import random as rand
 
 # boolean for if we use a straight mean or an exponential weighted moving avg.
 EWMA = False
-ARIMA = True
+ARIMA = False
 
 posMap = {'Def' : 1,
           'PK'  : 2,
@@ -19,12 +19,10 @@ posMap = {'Def' : 1,
           'TE'  : 5,
           'WR'  : 6}
 
-defenseMap = {}
 def loadData(years):
 	allData = []
 	home = os.getcwd()
 	home = home[:-10] + 'fanduel/'
-	
 	for year in years: 
 		os.chdir(home + "/%d/" % year)
 		files = os.listdir(os.getcwd())
@@ -32,51 +30,49 @@ def loadData(years):
 			week = pd.DataFrame.from_csv(f, sep=';')
 			allData.append(week)
 	os.chdir(home)
-
 	allData = pd.concat(allData)
-
-
 	os.chdir(home)
 	return allData
 
-if __name__ == '__main__':
-	# Load Data
-	data = loadData(range(2011, 2016))
-
-	# Set Hyper Parameters
-	win_size = 5
-
-	# Create Buffers
-	
-	oppts = data.groupby('Oppt')
-	for oppt in oppts: 
-		if oppt[0] == '-':
+def defAdjusted(data, win_size):
+	'''returns a mapping that gives the score scored against a particular
+	opponent.  the order of this output is:
+	[week, year, def, pk, qb, rb, te, we]'''
+	defenseMap = {}	
+        oppts = data.groupby('Oppt')
+        for oppt in oppts: 
+                if oppt[0] == '-':
 			continue
 		opptData = oppt[1].sort(['Year', 'Week'])
-
-
+	
+		# sort by year and week for oppt
 		opptWeeks = oppt[1].groupby(['Year', 'Week'])
 		priors = np.array([])
 		for week in opptWeeks:
+			# table of of all position for each opponent for each 
+			# week/year combo
 			positions = week[1].groupby('Pos')
 			row = []
 			c = 21
 			for pos in positions: 
 				# print oppt[0], pos[0], sum(pos[1]['FD points'].values)
-
+				# save the total amount of points allowed by 
+				# that defense per position
 				row.append(sum(pos[1]['FD points'].values))
 				c -= posMap[pos[0]]
+			# if one of the positions was missed
+	
 			if c != 0:
 				row.insert(c-1, 0.0)
-			# print week[1]['Year'].values[0], week[1]['Week'].values[0]
 			row.insert(0, week[1]['Year'].values[0])
 			row.insert(0, week[1]['Week'].values[0])
+			# priors is an array of arrays with all the points allowed
 			priors = np.append(priors, row)
 		priors = np.reshape(priors, (len(priors)/8, 8))
-
+	
 		# computing moving avg of defensive totals
 		# print priors
-
+	
 		window = np.zeros([win_size, len(priors)])
 		seasons = priors[:, 2:]
 		# priors = priors[win_size-1:, :]
@@ -86,23 +82,27 @@ if __name__ == '__main__':
 			window = seasons[i:i+win_size]
 			window = window.mean(0)
 			mavg[i] = window
-
+	
 		# print range(win_size, len(mavg)+win_size-1)
 		for i in range(win_size-1, win_size-1 + len(mavg)):
 			priors[i, 2:] = mavg[i-(win_size-1)]
-		defenseMap[oppt[0]] = [priors]
-
-	# exit(0)
-
-
-	priors = np.zeros([len(data.values), 1])
-	FFPG = [0 for i in range(len(data.values))]
-	FFPG_low = [0 for i in range(len(data.values))]
-	FFPG_high= [0 for i in range(len(data.values))]
+		defenseMap[oppt[0]] = [priors]        
+	return defenseMap
+if __name__ == '__main__':
+	# Load Data
+	data = loadData(range(2011, 2016))
 	
-	price = [0 for i in range(len(data.values))]
+	# Set Hyper Parameters
+	win_size = 5
+	defenseMap = defAdjusted(data, win_size)
+	priors = np.zeros([len(data.values), 1])
+	FFPG = [0] * (len(data.values))
+	FFPG_low = [0] * (len(data.values))
+	FFPG_high= [0] * (len(data.values))
+	price = [0] * (len(data.values))
+	FDStd = [0] * (len(data.values))
 	players = data.groupby(['Name', 'Team', 'Pos'])
-	FDStd = [0 for i in range(len(data.values))]
+
 	for player in players: 
 		playerData = player[1].sort(['Year', 'Week'])
 		# print playerData
@@ -110,18 +110,14 @@ if __name__ == '__main__':
 		total_salary = []
 		unadjusted_points = []
 		for row in playerData.iterrows():
-			
-
 			oppt = row[1]['Oppt']
 			week = row[1]['Week']
 			year = row[1]['Year']
 			pos = row[1]['Pos']
-
-			# print oppt, week, year, pos
+			if year == 2015:
+				print oppt, week, year, pos
 			if oppt == '-':
 				continue
-
-
 			#FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 			if EWMA and len(total_points) > 0:
 				FFPG[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
@@ -165,19 +161,17 @@ if __name__ == '__main__':
 				
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
-				# print oppt[0][i]
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					adjMap = {'Def' : oppt[0][i][posMap[pos]-1]/2.0,
-					          'PK'  : oppt[0][i][posMap[pos]-1]/10.0,
-					          'QB'  : oppt[0][i][posMap[pos]-1]/1.5,
-					          'RB'  : oppt[0][i][posMap[pos]-1]/2.0,
-					          'TE'  : oppt[0][i][posMap[pos]-1]/4.0,
-					          'WR'  : oppt[0][i][posMap[pos]-1]/6.0}
-					#print adjMap
-					#if pos == 'PK':
-					#	print posMap[pos]
+					adjMap = {'Def' : oppt[0][i][posMap[pos]+1]/2.0,
+					          'PK'  : oppt[0][i][posMap[pos]+1]/10.0,
+					          'QB'  : oppt[0][i][posMap[pos]+1]/1.5,
+					          'RB'  : oppt[0][i][posMap[pos]+1]/2.0,
+					          'TE'  : oppt[0][i][posMap[pos]+1]/4.0,
+					          'WR'  : oppt[0][i][posMap[pos]+1]/6.0}
+					
 					total_points.append(row[1]['FD points'] + adjMap[pos])
+					continue
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
 			unadjusted_points.append(row[1]['FD points'])
@@ -207,4 +201,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedDataarima.csv')
+	data.to_csv(home + 'computedData.csv')
