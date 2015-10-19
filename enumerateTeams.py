@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np 
 from itertools import combinations
 
+
+
 def ChooseN(wr, wrPoints, wrCost, n):
     allPossible = [",".join(map(str,comb)) for comb in combinations(wr, n)]
     allPossible = [lst.split(',') for lst in allPossible]
@@ -27,25 +29,32 @@ def combinePositions(list1, list2, score):
             players2 = group[0]
             points2 = group[1]
             cost2 = group[2]
-            if points1 + points2 < score or cost1 + cost2 > 50700:
+            if points1 + points2 < score or cost1 + cost2 > 60000:
                 continue
             else:
                 largerlist.append((players1 + players2, points1 + points2, cost1+cost2))
     return largerlist
 
-def enumerated(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost):  
-    qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 100) 
+def enumerated(q, rb, te, wr, k, d, qbPoints, qbCost, rbPoints, rbCost, tePoints, \
+               teCost, wrPoints, wrCost, kPoints, kCost, dPoints, dCost):  
+    qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 130) 
     print len(qbs)
-    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 110)    
+    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 150)    
     print len(qbs)
-    out = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 155)
+    qbs = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 195)
+    print len(qbs)
+    special = combinePositions(ChooseN(k, kPoints, kCost, 1), \
+                               ChooseN(d, dPoints, dCost, 1), 20)
+    print len(special)
+    out = combinePositions(qbs, special, 230)
     print len(out)
     return out
+
 
 if __name__ == '__main__':
     home = os.getcwd()
     home = home[:-10] + 'fanduel/'
-    data = pd.DataFrame.from_csv(home + 'computedDataarima.csv')
+    data = pd.DataFrame.from_csv(home + 'computedData.csv')
     data = data.sort(['FFPG'], ascending = False)
     
     # corr = pd.DataFrame.from_csv(home + 'pointcorr.csv')
@@ -64,10 +73,10 @@ if __name__ == '__main__':
     positionPoints = {}
     positionCost = {}
     position_map = {'def': 0, 'kick': 1, 'qb' : 2, 'rb': 3, 'te' : 4, 'wr' : 5}
-    position_len_map = {'qb' : 25, 'rb': 35, 'te' : 15, 'wr' : 45}
+    position_len_map = {'def':24, 'kick':24, 'qb' : 25, 'rb': 35, 'te' : 15, 'wr' : 45}
     for position in ['def', 'kick', 'qb', 'rb', 'te', 'wr']:
         # choices are the players/defenses that can be chosen
-        if position in ['qb', 'rb', 'te', 'wr']:
+        if position in ['qb', 'rb', 'te', 'wr', 'kick', 'def']:
             choices[position] = pos[position_map[position]][1].values[0:position_len_map[position],3]             
         else:
             choices[position] = pos[position_map[position]][1].values[:,3]             
@@ -80,5 +89,12 @@ if __name__ == '__main__':
             positionCost[position][choices[position][i]] = cost[i]
             
     a = enumerated(choices['qb'], choices['rb'], choices['te'], \
-    choices['wr'], positionPoints['qb'], positionCost['qb'], positionPoints['rb'], positionCost['rb'], positionPoints['te'],\
-    positionCost['te'], positionPoints['wr'], positionCost['wr'])
+    choices['wr'], choices['kick'], choices['def'], positionPoints['qb'], \
+    positionCost['qb'], positionPoints['rb'], positionCost['rb'], positionPoints['te'],\
+    positionCost['te'], positionPoints['wr'], positionCost['wr'], positionPoints['kick'],\
+    positionCost['kick'], positionPoints['def'], positionCost['def'])
+    
+    with open('meanteams3.csv', 'w') as f:
+        for elem in a:
+            lineup = ', '.join(elem[0])
+            f.write(lineup + '\n')
