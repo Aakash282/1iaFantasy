@@ -11,19 +11,13 @@ a = ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'HopkinsDeAndre', 'DiggsStefon', 
 
 
 def genTeams():
+    return 0
+
+
+def genPosition(players, pvals):
+    pvals = [x/45.0 for x in range(10)]
+    return players[list(np.random.multinomial(1, pvals)).index(1)]
     
-    for positions in position:
-        
-def genPosition():
-    pvals = [x / 45.0 for x in range(10)]
-    return np.random.multinomial(1, pvals)
-    
-
-
-
-
-
-
 def simulateTeam(team, n):
     ''' this is an example of how we can model the performance of various teams
     each of the players has a high and low range in their confidence interval 
@@ -113,7 +107,34 @@ def payoutStructure(contest, rank):
                      '1301 1800':125, '1801 2500':100, '2501 3300':75, \
                      '3301 4100':50, '4101 5000':40, '5001 6000':30, \
                      '6001 7500':25, '7501 10000':20, '10001 13000':15, \
-                     '13001 30000':12, '30001 90800':10}}
+                     '13001 30000':12, '30001 90800':10},
+            # 287,356 contestants with an entry fee of $2
+            'Snap': {'1':25000, '2':15000, '3':10000, '4':7500, '5':5000, \
+                     '6':4000, '7':3000, '8':2500, '9 10':2000, '11 12':1500, \
+                     '13 15':1000, '16 20':750, '21 27':500, '28 35':400, \
+                     '36 50':300, '51 70':250, '71 100':200, '101 150':150, \
+                     '151 250':125, '251 370':100, '371 500':75, '501 700':50, \
+                     '701 1000':40, '1001 1500':30, '1501 2200':25, \
+                     '2201 3000':20, '3001 4000':15, '4001 5500':12, \
+                     '5501 7500':10, '7501 10000':8, '10001 15000':6, \
+                     '15001 30000':5, '30001 55450':4},
+            # Many of these appear.  There are 4597 contestants w/ $1 entry
+            'MiniDive':{'1':400, '2':200, '3':150, '4':100, '5':75, '6':60, \
+                        '7 8':50, '9 10':40, '11 14':30, '15 20':25, \
+                        '21 30':20, '31 50':15, '51 70':10, '71 100':7, \
+                        '101 200':4, '201 702':2.5}, 
+            # Many of these appear.  There are 2873 contestants w/ $2 entry
+            'MiniSnap':{'1':500, '2':300, '3':200, '4':150, '5':100, '6':80, \
+                        '7':60, '8 10':50, '11 13':40, '14 16':30, '17 21':25, \
+                        '22 30':20, '31 41':15, '42 55':12, '56 75':10, \
+                        '76 101':8, '102 202':6, '203 304':5, '305 576':4}, 
+            # Many of these appear.  There are 1149 contestants w/ $5 entry
+            'MiniRush':{'1':500, '2':300, '3':250, '4':200, '5':150, '6':100, \
+                        '7':75, '8':60, '9 11':50, '12 15':40, '16 20':35, \
+                        '21 30':30, '31 45':25, '46 64':20, '65 84':15, \
+                        '85 206':12.5}
+            }
+
     if rank == '':
         return payoffs[contest]
     for elem in payoffs[contest].keys():
@@ -127,3 +148,7 @@ def payoutStructure(contest, rank):
     return 0
 
     
+    
+
+
+
