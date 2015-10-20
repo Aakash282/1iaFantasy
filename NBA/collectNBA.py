@@ -9,7 +9,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 
 # headers
-headers = ['day', 'month', 'year', 'pos', 'name', 'starter', 'FD', 'salary', 'team', 'opp_team', 'home', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
+headers = ['id', 'day', 'month', 'year', 'pos', 'name', 'starter', 'FD', 'salary', 'team', 'opp_team', 'home', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
 
 # years for which data is available
 years = range(2014, 2015)
@@ -19,6 +19,8 @@ months = [1, 2, 3, 4, 5, 6, 10, 11, 12]
 # setting up directory for where data will be stored
 home = os.getcwd()
 home = home[:-14] + '/fanduel/NBA'
+
+row_id = 0.0
 
 # # iterating over the years for which data will be collected
 for y in years:
@@ -65,6 +67,8 @@ for y in years:
 
                     # store each player's stats in this array
                     player = []
+                    player.append(row_id)
+                    row_id += 1.0
                     player.append(d)
                     player.append(m)
                     player.append(y)
@@ -74,6 +78,7 @@ for y in years:
                     
                     # if player_raw_data is actual data for a player (as opposed to header info)
                     if len(player_raw_data) <= 0 or str(player_raw_data[0]).startswith('<td colspan='):
+                        row_id -= 1.0
                         continue
                     
                     # add all the info to player array
@@ -82,7 +87,8 @@ for y in years:
                         player.append((soup.td.text).encode('utf-8'))
 
                     # sanity check
-                    if not player[headers.index('name')] or 'N/A' in player[:7]:
+                    if not player[headers.index('name')] or 'N/A' in player[:9]:
+                        row_id -= 1.0
                         continue
 
                     # remove comma in player name
