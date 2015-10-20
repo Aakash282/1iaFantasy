@@ -9,7 +9,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 
 # headers
-headers = ['pos', 'name', 'starter', 'salary', 'team', 'opp_team', 'home', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
+headers = ['id', 'day', 'month', 'year', 'pos', 'name', 'starter', 'FD', 'salary', 'team', 'opp_team', 'home', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
 
 # years for which data is available
 years = range(2014, 2015)
@@ -18,10 +18,11 @@ years = range(2014, 2015)
 months = [1, 2, 3, 4, 5, 6, 10, 11, 12] 
 # setting up directory for where data will be stored
 home = os.getcwd()
-print home
 home = home[:-14] + '/fanduel/NBA'
 
-# iterating over the years for which data will be collected
+row_id = 0.0
+
+# # iterating over the years for which data will be collected
 for y in years:
     # setting up folder to save data
     dir_path = home + ("/%d/" % y)
@@ -30,8 +31,14 @@ for y in years:
     os.makedirs(dir_path)
     os.chdir(dir_path)
 
+    # actual year
+    act_y = y
     # iterating over the months
     for m in months:
+        if m < 7:
+            y = act_y + 1
+        else:
+            y = act_y
         print "\nYear: %d, Month: %d" % (y, m)
 
         # iterating over the days
@@ -60,13 +67,18 @@ for y in years:
 
                     # store each player's stats in this array
                     player = []
-
+                    player.append(row_id)
+                    row_id += 1.0
+                    player.append(d)
+                    player.append(m)
+                    player.append(y)
                     soup = BeautifulSoup(line, "html.parser")
                     
                     player_raw_data = soup.find_all('td')
                     
                     # if player_raw_data is actual data for a player (as opposed to header info)
                     if len(player_raw_data) <= 0 or str(player_raw_data[0]).startswith('<td colspan='):
+                        row_id -= 1.0
                         continue
                     
                     # add all the info to player array
@@ -75,30 +87,34 @@ for y in years:
                         player.append((soup.td.text).encode('utf-8'))
 
                     # sanity check
-                    if not player[1]:
+                    if not player[headers.index('name')] or 'N/A' in player[:9]:
+                        row_id -= 1.0
                         continue
 
                     # remove comma in player name
-                    player[1] = player[1].replace(',', '')
+                    name_ind = headers.index('name')
+                    player[name_ind] = player[name_ind].replace(',', '')
 
                     # check if player is a starter
-                    if player[1][-1] == '^':
-                        player[1] = player[1][:-1]
-                        player[2] = 1
+                    if player[name_ind][-1] == '^':
+                        player[name_ind] = player[name_ind][:-1]
+                        player.insert(name_ind + 1, 1)
                     else:
-                        player[2] = 0
-
+                        player.insert(name_ind + 1, 0)
+                    
                     # remove '$' and comma from salary
-                    if player[3] != 'N/A':
-                        player[3] = player[3][1:].replace(',', '')
+                    salary_ind = headers.index('salary')
+                    if player[salary_ind] != 'N/A':
+                        player[salary_ind] = player[salary_ind][1:].replace(',', '')
 
                     # check if player is on home team or away team
-                    if player[5][0] == 'v':
-                        player[5] = player[5][2:]
-                        player.insert(6, 1)
+                    opp_team_ind = headers.index('opp_team')
+                    if player[opp_team_ind][0] == 'v':
+                        player[opp_team_ind] = player[opp_team_ind][2:]
+                        player.insert(opp_team_ind + 1, 1)
                     else:
-                        player[5] = player[5][2:]
-                        player.insert(6, 0)
+                        player[opp_team_ind] = player[opp_team_ind][2:]
+                        player.insert(opp_team_ind + 1, 0)
 
                     # parse actual player stats
                     player_stats = player[-1][4:].split()
@@ -116,7 +132,7 @@ for y in years:
                     player = player[:-1]
 
                     # based on order of headers, add relevant data and fill missing data with 0s
-                    for i in range(8, len(headers)):
+                    for i in range(headers.index('pt'), len(headers)):
                         if headers[i] in player_stats:
                             player.append(player_stats[headers[i]])
                         else:
@@ -134,10 +150,17 @@ for y in years:
 
                         # write data to file
                         for player_data in daily_data:
-                            for data in player_data:
+                            for i,data in enumerate(player_data):
                                 w.write(str(data))
-                                w.write(',')
+                                if i < len(player_data) - 1:
+                                    w.write(',')
                             w.write('\n')
 
             os.remove(filename)
+
+    files = os.listdir(dir_path)
+    for file_name in files:
+        if 'hyday' in file_name:
+            os.remove(file_name)
+
 
