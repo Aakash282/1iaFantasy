@@ -1,16 +1,16 @@
 # computePriors.py
-
 import re
 import os
 import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
-import random as rand
-
+from arima import predArma
 # boolean for if we use a straight mean or an exponential weighted moving avg.
+
 EWMA = False
 ARIMA = False
+ARMA = True
 
 posMap = {'Def' : 1,
           'PK'  : 2,
@@ -114,8 +114,6 @@ if __name__ == '__main__':
 			week = row[1]['Week']
 			year = row[1]['Year']
 			pos = row[1]['Pos']
-			if year == 2015:
-				print oppt, week, year, pos
 			if oppt == '-':
 				continue
 			#FFPG[int(row[0])] = np.mean(total_points[-win_size:])
@@ -141,7 +139,7 @@ if __name__ == '__main__':
 				print 'confidence interval', output[1], output[2]
 				# cuts off the last entry, which is just ''
 				output = [float(x) for x in output[0:3]]
-				if output[0] > 600 or output[0] < 0:
+				if output[0] > 60 or output[0] < 0:
 					FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 					FFPG_low[int(row[0])] = 0.1
 					FFPG_high[int(row[0])] = 0.1
@@ -153,7 +151,21 @@ if __name__ == '__main__':
 
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
-				
+			elif ARMA and len(total_points) > 5:
+				try:
+					arma = predArma(total_points)
+				except ValueError:
+					FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+					price[int(row[0])] = np.mean(total_salary[-win_size:])
+					FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
+					FFPG_low[int(row[0])] = 0
+					FFPG_high[int(row[0])] = 0
+					
+				FFPG[int(row[0])] = arma['prediction']			
+				FFPG_low[int(row[0])] = arma['confidence interval'][0]
+				FFPG_high[int(row[0])] = arma['confidence interval'][1]
+				price[int(row[0])] = np.mean(total_salary[-win_size:])
+				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])				
 			else:
 				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
@@ -163,15 +175,18 @@ if __name__ == '__main__':
 			for i in range(len(oppt[0])):
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
 					# print row[1]['FD points'] / oppt[0][i][2 + posMap[pos]-1]
-					adjMap = {'Def' : oppt[0][i][posMap[pos]+1]/2.0,
-					          'PK'  : oppt[0][i][posMap[pos]+1]/10.0,
-					          'QB'  : oppt[0][i][posMap[pos]+1]/1.5,
-					          'RB'  : oppt[0][i][posMap[pos]+1]/2.0,
-					          'TE'  : oppt[0][i][posMap[pos]+1]/4.0,
-					          'WR'  : oppt[0][i][posMap[pos]+1]/6.0}
-					
-					total_points.append(row[1]['FD points'] + adjMap[pos])
-					continue
+					adjMap = {'Def' : oppt[0][i][posMap[pos]+1],
+					          'PK'  : oppt[0][i][posMap[pos]+1],
+					          'QB'  : oppt[0][i][posMap[pos]+1],
+					          'RB'  : oppt[0][i][posMap[pos]+1],
+					          'TE'  : oppt[0][i][posMap[pos]+1],
+					          'WR'  : oppt[0][i][posMap[pos]+1]}
+					normMap = {'Def': 2.0, 'PK':2.0, 'QB':1.5, \
+					           'RB': 2.0, 'TE': 4.0, 'WR': 6.0}
+					# normMap is used to roughly normalize to vals
+					total_points.append((row[1]['FD points'] + adjMap[pos]/normMap[pos]\
+					                     /(1 + 1/normMap[pos])))
+					#total_points.append(row[1]['FD points'])
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
 			unadjusted_points.append(row[1]['FD points'])
@@ -180,9 +195,9 @@ if __name__ == '__main__':
 			FFPG[i] = 0
 		if np.isnan(price[i]):
 			price[i] = 7000
-		if np.isnan(FDStd[i]):
+		if np.isnan(FDStd[i]) or FDStd[i] == 0:
 			# Set to 0 to not give any false ceiling readings
-			FDStd[i] = 0
+			FDStd[i] = FFPG[i] ** (.5)
 
 	data['FFPG'] = pd.Series(FFPG)
 	data['Average salary'] = pd.Series(price)
@@ -201,4 +216,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedData.csv')
+	data.to_csv(home + 'computedDataarma.csv')

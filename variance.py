@@ -53,22 +53,24 @@ def weights(teamLists, desiredMean):
         mu.append(expected(team, data))
     mu = np.array(mu)
     if min(mu) > desiredMean or max(mu) < desiredMean:
-        print 'change the mean between', min(mu), 'and', max(mu)
-        return 0
+        print 'mean changed to', mu.mean()
+        return weights(teamLists, mu.mean())
     covMatrix = covMatr(teamLists)
 
     # this is just the total variance of the portfolio
     fun = lambda x: np.transpose(x).dot(covMatrix).dot(x)
     cons = ({'type': 'eq', 'fun': lambda x: 1 - sum(x)}, \
-            {'type': 'eq', 'fun': lambda x: np.array(x).dot(mu) - desiredMean}\
-            #,{'type': 'eq', 'fun': lambda x: abs(np.array(x)) - np.array(x)}
-            )
+            {'type': 'eq', 'fun': lambda x: np.array(x).dot(mu) - desiredMean})
     bnds = tuple((0, 1) for x in range(len(teamLists)))
     # this minizes the total variance of the portfolio under the given 
     # constraints
-    a = scipy.optimize.minimize(fun, [.1] * len(teamLists), method = 'SLSQP', \
-                            bounds = bnds, constraints = cons)
-    return a
+    a = scipy.optimize.minimize(fun, [1/float(len(teamLists))] * len(teamLists),\
+                            method = 'SLSQP', bounds = bnds, constraints = cons)
+    if a.message != 'Optimization terminated successfully.':
+        print a.message
+        return 0
+    print a
+    return a.x
     
     
 def covMatr(teamLists):
