@@ -8,7 +8,7 @@ import time
 years = range(2011, 2016)
 weeks = [x+1 for x in range(17)]
 home = os.getcwd()
-home = home[:-10] + 'fanduel/'
+home = home[:-14] + 'fanduel/NFL/'
 row_id = 0
 for y in years:
     os.makedirs(home + ("/%d/" % y))
