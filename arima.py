@@ -1,4 +1,4 @@
-import statsmodels.tsa.arima_model as arimaModel
+# import statsmodels.tsa.arima_model as arimaModel
 import random as rand
 
 '''

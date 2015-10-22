@@ -37,16 +37,16 @@ def combinePositions(list1, list2, score):
 
 def enumerated(q, rb, te, wr, k, d, qbPoints, qbCost, rbPoints, rbCost, tePoints, \
                teCost, wrPoints, wrCost, kPoints, kCost, dPoints, dCost):  
-    qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 130) 
+    qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 110) 
     print len(qbs)
-    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 150)    
+    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 155)    
     print len(qbs)
-    qbs = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 195)
+    qbs = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 170)
     print len(qbs)
     special = combinePositions(ChooseN(k, kPoints, kCost, 1), \
                                ChooseN(d, dPoints, dCost, 1), 20)
     print len(special)
-    out = combinePositions(qbs, special, 230)
+    out = combinePositions(qbs, special, 20)
     print len(out)
     return out
 

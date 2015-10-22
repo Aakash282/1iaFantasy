@@ -10,7 +10,7 @@ from arima import predArma
 
 EWMA = False
 ARIMA = False
-ARMA = True
+ARMA = False
 
 posMap = {'Def' : 1,
           'PK'  : 2,
@@ -216,4 +216,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedDataarma.csv')
+	data.to_csv(home + 'computedData.csv')
