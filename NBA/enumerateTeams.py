@@ -1,160 +1,88 @@
-import wget 
-import re
 import os
-import time
 import pandas as pd 
 import numpy as np 
-from matplotlib import pyplot as plt 
-import multiprocessing
-from joblib import Parallel, delayed
+from itertools import combinations
 
-def enumerate(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost):
-    print q
-    home = os.getcwd()
-    home = home[:-10] + 'fanduel/'
-    with open(home + 'qb/%s.csv' % q, 'w') as f:
-        team = []
-        cost = 0
-        points = 0
-        
-        # add qb to team
-        team.append(q)
-        points += qbPoints[q]
-        cost += qbCost[q]
+def ChooseN(plr, plrPoints, plrCost, n):
+    allPossible = [",".join(map(str,comb)) for comb in combinations(plr, n)]
+    allPossible = [lst.split(',') for lst in allPossible]
+    allList = []
+    for elem in allPossible:
+        points, price, playerlist = 0, 0, []
+        for i in range(n):
+            points += plrPoints[elem[i]]
+            price += plrCost[elem[i]]
+            playerlist.append(elem[i])
+        allList.append([playerlist, points, price])
+    del allPossible
+    return allList
 
-        for r in rb:
-            team.append(r)
-            points += rbPoints[r]
-            cost += rbCost[r]
-            for b in rb:
-                if b in team:
-                    continue
-                team.append(b)
-                points += rbPoints[b]
-                cost += rbCost[b]
-                for w1 in wr:
-                    team.append(w1)
-                    points += wrPoints[w1]
-                    cost += wrCost[w1]
-                    for w2 in wr:
-                        if w2 in team:
-                            continue
-                        team.append(w2)
-                        points += wrPoints[w2]
-                        cost += wrCost[w2]
-                        for w3 in wr:
-                            if w3 in team:
-                                continue
-                            team.append(w3)
-                            points += wrPoints[w3]
-                            cost += wrCost[w3]
-                            for t in te: 
-                                team.append(t)
-                                points += tePoints[t]
-                                cost += teCost[t]
-                                if cost <= 50700:
-                                    if points > 140:
-                                        print ';'.join(team) + ('%f\n' % points)
-                                        f.write(';'.join(team) + (';%f\n' % points))
-                                team.pop()
-                                points -= tePoints[t]
-                                cost -= teCost[t]
-                            points -= wrPoints[w3]
-                            cost -= wrCost[w3]
-                            team.pop()
-                        points -= wrPoints[w2]
-                        cost -= wrCost[w2]
-                        team.pop()
-                    points -= wrPoints[w1]
-                    cost -= wrCost[w1]
-                    team.pop()
-                points -= rbPoints[b]
-                cost -= rbCost[b]
-                team.pop()
-            cost -= rbCost[r]
-            points -= rbPoints[r]
-            team.pop()
+def combinePositions(list1, list2, score):
+    largerlist = []
+    for elem in list1:
+        players1 = elem[0]
+        points1 = elem[1]
+        cost1 = elem[2]
+        for group in list2:
+            players2 = group[0]
+            points2 = group[1]
+            cost2 = group[2]
+            if points1 + points2 < score or cost1 + cost2 > 60000:
+                continue
+            else:
+                largerlist.append((players1 + players2, points1 + points2, cost1+cost2))
+    return largerlist
+
+def enumerated(pg, sg, sf, pf, c, pgPoints, pgCost, sgPoints, sgCost, sfPoints, sfCost, pfPoints, \
+               pfCost, cPoints, cCost):  
+    plr = combinePositions(ChooseN(pg, pgPoints, pgCost, 2), ChooseN(sg, sgPoints, sgCost, 2), 70) 
+    print len(plr)
+    plr = combinePositions(plr, ChooseN(sf, sfPoints, sfCost, 2), 150)    
+    print len(plr)
+    plr = combinePositions(plr, ChooseN(pf, pfPoints, pfCost, 2), 240)
+    print len(plr)
+    plr = combinePositions(plr, ChooseN(c, cPoints, cCost, 1), 280)
+    print len(plr)
+    for lineup in plr:
+        print lineup    
+    return plr
 
 if __name__ == '__main__':
     home = os.getcwd()
-    home = home[:-10] + 'fanduel/'
+    home = home[:-14] + 'fanduel/NBA/'
     data = pd.DataFrame.from_csv(home + 'computedData.csv')
+    data = data.sort(['FBPG'], ascending = False)
     
-    # corr = pd.DataFrame.from_csv(home + 'pointcorr.csv')
-    # elements of the correlation matrix can be accessed like a 2d array:
-    # corr['T1K']['T2K'] = corr['T2K']['T1K'] (by symmetry)
-    # print data
-    year = data[data['Year'] == 2015]
-    # print year
-    week = year[year['Week'] == 6]
-    # print week
-    # week = week[np.isfinite(week['FD points'])]
-    # print week
-
-    posData = week.groupby('Pos')
+    year = data[data['year'] == 2014]
+    month = year[year['month'] == 12]
+    day = month[month['day'] == 4]
+    
+    posData = day.groupby('pos')
     pos = [positionData for positionData in posData]
-    print pos[0][1].values
-    defense = pos[0][1].values[:,3]
-    # print defense
-    points = pos[0][1].values[:,8]
-    cost = pos[0][1].values[:,9]
-    defensePoints = {}
-    defenseCost = {}
-    for i in range(len(defense)):
-        defensePoints[defense[i]] = points[i]
-        defenseCost[defense[i]] = cost[i]
 
-    kicker = pos[1][1].values[:,3]
-    points = pos[1][1].values[:,8]
-    cost = pos[1][1].values[:,9]
-    kickerPoints = {}
-    kickerCost = {}
-    for i in range(len(kicker)):
-        kickerPoints[kicker[i]] = points[i]
-        kickerCost[kicker[i]] = cost[i]
+    choices = {}
+    positionPoints = {}
+    positionCost = {}
+    position_map = {'c': 0, 'pf': 1, 'pg' : 2, 'sf': 3, 'sg' : 4}
+    position_len_map = {'pg':25, 'sg':25, 'sf' : 25, 'pf': 25, 'c' : 25}
+    for position in ['pg', 'sg', 'sf', 'pf', 'c']:
+        # choices are the players/defenses that can be chosen
+        choices[position] = pos[position_map[position]][1].values[0:position_len_map[position], 5]            
+        points = pos[position_map[position]][1].values[:,-2]
+        cost = pos[position_map[position]][1].values[:,-1]
+        positionPoints[position] = {}
+        positionCost[position] = {}
 
-    qb = pos[2][1].values[0:25,3]
-    points = pos[2][1].values[:,8]
-    cost = pos[2][1].values[:,9]
-    print qb
-    qbPoints = {}
-    qbCost = {}
-    for i in range(len(qb)):
-        qbPoints[qb[i]] = points[i]
-        qbCost[qb[i]] = cost[i]
-
-    rb = pos[3][1].values[0:25,3]
-    points = pos[3][1].values[:,8]
-    cost = pos[3][1].values[:,9]
-    rbPoints = {}
-    rbCost = {}
-    for i in range(len(rb)):
-        rbPoints[rb[i]] = points[i]
-        rbCost[rb[i]] = cost[i]
-
-    te = pos[4][1].values[0:12,3]
-    points = pos[4][1].values[:,8]
-    cost = pos[4][1].values[:,9]
-    tePoints = {}
-    teCost = {}
-    for i in range(len(te)):
-        tePoints[te[i]] = points[i]
-        teCost[te[i]] = cost[i]
-
-    wr = pos[5][1].values[0:45,3]
-    points = pos[5][1].values[:,8]
-    cost = pos[5][1].values[:,9]
-    wrPoints = {}
-    wrCost = {}
-    for i in range(len(wr)):
-        wrPoints[wr[i]] = points[i]
-        wrCost[wr[i]] = cost[i]
-
-    # the -1 is because I like to use my computer while running things
-    num_cores = multiprocessing.cpu_count() - 1
-    # to ensure that at least one core is being used
-    num_cores = max(num_cores, 1)
-
-    Parallel(n_jobs = num_cores)(delayed(enumerate)(q, rb, te, wr, qbPoints, qbCost, rbPoints, rbCost, tePoints, teCost, wrPoints, wrCost) for q in qb)
-
-
+        for i in range(len(choices[position])):
+            positionPoints[position][choices[position][i]] = points[i]
+            positionCost[position][choices[position][i]] = cost[i]
+    a = enumerated(choices['pg'], choices['sg'], choices['sf'], \
+    choices['pf'], choices['c'], positionPoints['pg'], \
+    positionCost['pg'], positionPoints['sg'], positionCost['sg'], positionPoints['sf'],\
+    positionCost['sf'], positionPoints['pf'], positionCost['pf'], positionPoints['c'],\
+    positionCost['c'])
+    
+    with open('enumeratedteams.csv', 'w') as f:
+        for elem in a:
+            lineup = ', '.join(elem[0])
+            f.write(lineup + '\n')

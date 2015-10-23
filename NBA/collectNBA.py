@@ -43,7 +43,7 @@ for y in years:
 
         # iterating over the days
         for d in range(1, 32):
-            url = "http://rotoguru1.com/cgi-bin/hyday.pl?mon=%d&day=%d&game=fd" % (m, d)
+            url = "http://rotoguru1.com/cgi-bin/hyday.pl?game=fd&mon=%d&day=%d&year=%d" % (m, d, y)
 
             # saving and parsing webpage
             filename = wget.download(url)
