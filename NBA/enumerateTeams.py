@@ -35,13 +35,13 @@ def combinePositions(list1, list2, score):
 
 def enumerated(pg, sg, sf, pf, c, pgPoints, pgCost, sgPoints, sgCost, sfPoints, sfCost, pfPoints, \
                pfCost, cPoints, cCost):  
-    plr = combinePositions(ChooseN(pg, pgPoints, pgCost, 2), ChooseN(sg, sgPoints, sgCost, 2), 150) 
+    plr = combinePositions(ChooseN(pg, pgPoints, pgCost, 2), ChooseN(sg, sgPoints, sgCost, 2), 70) 
     print len(plr)
-    plr = combinePositions(plr, ChooseN(sf, sfPoints, sfCost, 2), 200)    
+    plr = combinePositions(plr, ChooseN(sf, sfPoints, sfCost, 2), 150)    
     print len(plr)
-    plr = combinePositions(plr, ChooseN(pf, pfPoints, pfCost, 2), 300)
+    plr = combinePositions(plr, ChooseN(pf, pfPoints, pfCost, 2), 240)
     print len(plr)
-    plr = combinePositions(plr, ChooseN(c, cPoints, cCost, 1), 360)
+    plr = combinePositions(plr, ChooseN(c, cPoints, cCost, 1), 280)
     print len(plr)
     for lineup in plr:
         print lineup    
@@ -51,14 +51,15 @@ if __name__ == '__main__':
     home = os.getcwd()
     home = home[:-14] + 'fanduel/NBA/'
     data = pd.DataFrame.from_csv(home + 'computedData.csv')
-    data = data.sort(['FFPG'], ascending = False)
+    data = data.sort(['FBPG'], ascending = False)
     
     year = data[data['year'] == 2014]
-    month = year[year['month'] == 11]
-    day = month[month['day'] == 5]
+    month = year[year['month'] == 12]
+    day = month[month['day'] == 4]
     
     posData = day.groupby('pos')
     pos = [positionData for positionData in posData]
+
     choices = {}
     positionPoints = {}
     positionCost = {}
@@ -67,9 +68,8 @@ if __name__ == '__main__':
     for position in ['pg', 'sg', 'sf', 'pf', 'c']:
         # choices are the players/defenses that can be chosen
         choices[position] = pos[position_map[position]][1].values[0:position_len_map[position], 5]            
-        
-        points = pos[position_map[position]][1].values[:,7]
-        cost = pos[position_map[position]][1].values[:,8]
+        points = pos[position_map[position]][1].values[:,-2]
+        cost = pos[position_map[position]][1].values[:,-1]
         positionPoints[position] = {}
         positionCost[position] = {}
 
