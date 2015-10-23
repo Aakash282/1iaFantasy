@@ -39,21 +39,22 @@ def enumerated(q, rb, te, wr, k, d, qbPoints, qbCost, rbPoints, rbCost, tePoints
                teCost, wrPoints, wrCost, kPoints, kCost, dPoints, dCost):  
     qbs = combinePositions(ChooseN(rb, rbPoints, rbCost, 2), ChooseN(wr, wrPoints, wrCost, 3), 110) 
     print len(qbs)
-    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 155)    
+    qbs = combinePositions(ChooseN(q, qbPoints, qbCost, 1), qbs, 160)    
     print len(qbs)
-    qbs = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 170)
+    qbs = combinePositions(qbs, ChooseN(te, tePoints, teCost, 1), 180)
     print len(qbs)
-    special = combinePositions(ChooseN(k, kPoints, kCost, 1), \
-                               ChooseN(d, dPoints, dCost, 1), 20)
-    print len(special)
-    out = combinePositions(qbs, special, 20)
+    # special = combinePositions(ChooseN(k, kPoints, kCost, 1), \
+                               # ChooseN(d, dPoints, dCost, 1), 20)
+    # print len(special)
+    # out = combinePositions(qbs, special, 200)
+    out = combinePositions(qbs, ChooseN(d, dPoints, dCost, 1), 195)
     print len(out)
     return out
 
 
 if __name__ == '__main__':
     home = os.getcwd()
-    home = home[:-10] + 'fanduel/'
+    home = home[:-14] + 'fanduel/NFL/'
     data = pd.DataFrame.from_csv(home + 'computedData.csv')
     data = data.sort(['FFPG'], ascending = False)
     
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     # print data
     year = data[data['Year'] == 2015]
     # print year
-    week = year[year['Week'] == 6]
+    week = year[year['Week'] == 7]
     # print week
     # week = week[np.isfinite(week['FD points'])]
     # print week
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     positionCost['te'], positionPoints['wr'], positionCost['wr'], positionPoints['kick'],\
     positionCost['kick'], positionPoints['def'], positionCost['def'])
     
-    with open('meanteams3.csv', 'w') as f:
+    with open(home + 'lineups.csv', 'w') as f:
         for elem in a:
             lineup = ', '.join(elem[0])
             f.write(lineup + '\n')
