@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import scipy
 import scipy.optimize
+from matplotlib import pyplot as plt 
+
 
 lst = ['DaltonAndy', 'EllingtonAndre', 'FreemanDevonta', 'RobinsonAllen', 'MaclinJeremy', 'FitzgeraldLarry', 'EifertTyler']
 lst1 = ['BenjaminTravis', 'JonesJames', "BellLe'Veon", 'GronkowskiRob', 'DaltonAndy', 'LewisDion']
@@ -32,10 +34,12 @@ def teamScore(teamLists, week, year):
     data = filter_table(data, 'Year', year)
     scoreList = []
     for team in teamLists:
+        score = 0
         for player in team:
             temp = filter_table(data, 'Name', player)
-            score += temp['FD points']
+            score += temp['FD points'].values[0]
         scoreList.append(score)
+    return scoreList    
     plt.hist(scoreList)
     
 def weights(teamLists, desiredMean):
@@ -54,6 +58,7 @@ def weights(teamLists, desiredMean):
     mu = np.array(mu)
     if min(mu) > desiredMean or max(mu) < desiredMean:
         print 'mean changed to', mu.mean()
+        print 'mu range is', min(mu), 'to', max(mu)
         return weights(teamLists, mu.mean())
     covMatrix = covMatr(teamLists)
 

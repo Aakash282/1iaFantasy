@@ -9,13 +9,34 @@ import pandas as pd
 
 a = ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'HopkinsDeAndre', 'DiggsStefon', 'FitzgeraldLarry', 'GatesAntonio', 'CarolinaDefense']
 
+def genTeams(positionsDict, n, sims):
+    teams = []
+    posMap = {'QB':1, 'RB':2, 'WR':3, 'TE':1, 'PK':1, 'Def':1}
+    for i in range(n):
+        for position in posMap.keys():
+            team.append(genPosition(positionsDict[position], posMap[position]))
+        teams.append(simulateTeam(team, sims))
+    return teams
 
-def genTeams():
-    return 0
 
+def genPosition(positionDict, n):
+    '''Takes an input which is a dictionary of players for a given position'''
+    if n > len(positionDict.keys()):
+        print 'not enough input players!'
+        return 0
+    players = []
+    pvals = []
+    for player in positionDict.keys():
+        players.append(player)
+        pvals.append(positionDict[player])
+    outputPlayers = []
+    while len(outputPlayers) < n:
+        gen = genPosition(players, pvals)
+        if gen not in outputPlayers:
+            outputPlayers.append(gen)
+    return outputPlayers
 
 def genPosition(players, pvals):
-    pvals = [x/45.0 for x in range(10)]
     return players[list(np.random.multinomial(1, pvals)).index(1)]
     
 def simulateTeam(team, n):

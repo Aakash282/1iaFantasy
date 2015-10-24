@@ -10,7 +10,7 @@ from arima import predArma
 
 EWMA = False
 ARIMA = False
-ARMA = True
+ARMA = False
 
 posMap = {'Def' : 1,
           'PK'  : 2,
@@ -167,7 +167,14 @@ if __name__ == '__main__':
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])				
 			else:
-				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+				homeMap = {'QB': .02, 'RB': .0425, 'WR': 0, \
+				           'TE': .035, 'PK': .045, 'Def': .0825}
+				# home/away adjustments
+				if row[1]['h/a'] == 'h':
+					FFPG[int(row[0])] = (1 + homeMap[pos]) * np.mean(total_points[-win_size:])
+				else:
+					
+					FFPG[int(row[0])] = (1 - homeMap[pos]) * np.mean(total_points[-win_size:])
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
 				
@@ -181,7 +188,7 @@ if __name__ == '__main__':
 					          'RB'  : oppt[0][i][posMap[pos]+1],
 					          'TE'  : oppt[0][i][posMap[pos]+1],
 					          'WR'  : oppt[0][i][posMap[pos]+1]}
-					normMap = {'Def': 2.0, 'PK':2.0, 'QB':1.5, \
+					normMap = {'Def': 10000.0, 'PK':5.0, 'QB':1.5, \
 					           'RB': 2.0, 'TE': 4.0, 'WR': 6.0}
 					# normMap is used to roughly normalize to vals
 					total_points.append((row[1]['FD points'] + adjMap[pos]/normMap[pos]\
@@ -216,4 +223,4 @@ if __name__ == '__main__':
 	             'FD points', 'FD salary', 'FFPG', 'Average salary', \
 	             'Std FFPG', 'Floor', 'Ceiling']]
 	''' 
-	data.to_csv(home + 'computedDataarma.csv')
+	data.to_csv(home + 'computedData.csv')
