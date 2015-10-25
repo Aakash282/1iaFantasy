@@ -35,13 +35,13 @@ def combinePositions(list1, list2, score):
 
 def enumerated(pg, sg, sf, pf, c, pgPoints, pgCost, sgPoints, sgCost, sfPoints, sfCost, pfPoints, \
                pfCost, cPoints, cCost):  
-    plr = combinePositions(ChooseN(pg, pgPoints, pgCost, 2), ChooseN(sg, sgPoints, sgCost, 2), 70) 
+    plr = combinePositions(ChooseN(pg, pgPoints, pgCost, 2), ChooseN(sg, sgPoints, sgCost, 2), 60) 
     print len(plr)
-    plr = combinePositions(plr, ChooseN(sf, sfPoints, sfCost, 2), 150)    
+    plr = combinePositions(plr, ChooseN(sf, sfPoints, sfCost, 2), 140)    
     print len(plr)
     plr = combinePositions(plr, ChooseN(pf, pfPoints, pfCost, 2), 240)
     print len(plr)
-    plr = combinePositions(plr, ChooseN(c, cPoints, cCost, 1), 280)
+    plr = combinePositions(plr, ChooseN(c, cPoints, cCost, 1), 268)
     print len(plr)
     for lineup in plr:
         print lineup    
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     position_len_map = {'pg':25, 'sg':25, 'sf' : 25, 'pf': 25, 'c' : 25}
     for position in ['pg', 'sg', 'sf', 'pf', 'c']:
         # choices are the players/defenses that can be chosen
-        choices[position] = pos[position_map[position]][1].values[0:position_len_map[position], 5]            
+        choices[position] = pos[position_map[position]][1].values[0:position_len_map[position], 4]            
         points = pos[position_map[position]][1].values[:,-2]
         cost = pos[position_map[position]][1].values[:,-1]
         positionPoints[position] = {}
