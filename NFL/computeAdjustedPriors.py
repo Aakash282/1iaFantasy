@@ -6,12 +6,8 @@ import pandas as pd
 import numpy as np 
 from matplotlib import pyplot as plt 
 from arima import predArma
-# boolean for if we use a straight mean or an exponential weighted moving avg.
 
-EWMA = False
-ARIMA = False
-ARMA = False
-
+homeAdjustment = False
 posMap = {'Def' : 1,
           'PK'  : 2,
           'QB'  : 3,
@@ -99,6 +95,9 @@ if __name__ == '__main__':
 	FFPG = [0] * (len(data.values))
 	FFPG_low = [0] * (len(data.values))
 	FFPG_high= [0] * (len(data.values))
+	FFPG_Arma = [0] * (len(data.values))
+	FFPG_EWMA = [0] * (len(data.values))
+	Def_Allowed = [0] * (len(data.values))
 	price = [0] * (len(data.values))
 	FDStd = [0] * (len(data.values))
 	players = data.groupby(['Name', 'Team', 'Pos'])
@@ -109,6 +108,7 @@ if __name__ == '__main__':
 		total_points = [] 
 		total_salary = []
 		unadjusted_points = []
+		defensive_points = []
 		for row in playerData.iterrows():
 			oppt = row[1]['Oppt']
 			week = row[1]['Week']
@@ -117,12 +117,12 @@ if __name__ == '__main__':
 			if oppt == '-':
 				continue
 			#FFPG[int(row[0])] = np.mean(total_points[-win_size:])
-			if EWMA and len(total_points) > 0:
-				FFPG[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
-				price[int(row[0])] = pd.ewma(pd.Series(total_salary), span = win_size).values[-1]
-				FDStd[int(row[0])] = pd.ewmstd(pd.Series(unadjusted_points), span = win_size).values[-1]
+			if len(total_points) > 0:
+				FFPG_EWMA[int(row[0])] = pd.ewma(pd.Series(total_points), span = win_size).values[-1]
+			else:
+				FFPG_EWMA[int(row[0])] = 0
 			# ARIMA models need at least 6 points to adequately fit the data
-			elif ARIMA and len(total_points) >= 6 and np.mean(total_points) > 10:
+			if ARIMA and len(total_points) >= 6 and np.mean(total_points) > 10:
 				# the input mathematica string needs to be 
 				# formatted like {a,b,c}
 				cmdString = '{'
@@ -151,34 +151,32 @@ if __name__ == '__main__':
 
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
-			elif ARMA and len(total_points) > 5:
+			if len(total_points) > 5:
 				try:
 					arma = predArma(total_points)
 				except ValueError:
-					FFPG[int(row[0])] = np.mean(total_points[-win_size:])
-					price[int(row[0])] = np.mean(total_salary[-win_size:])
-					FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
+					FFPG_Arma[int(row[0])] = np.mean(total_points[-win_size:])
 					FFPG_low[int(row[0])] = 0
 					FFPG_high[int(row[0])] = 0
 					
-				FFPG[int(row[0])] = arma['prediction']			
+				FFPG_Arma[int(row[0])] = arma['prediction']			
 				FFPG_low[int(row[0])] = arma['confidence interval'][0]
 				FFPG_high[int(row[0])] = arma['confidence interval'][1]
-				price[int(row[0])] = np.mean(total_salary[-win_size:])
-				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])				
 			else:
-				homeMap = {'QB': .02, 'RB': .0425, 'WR': 0, \
-				           'TE': .035, 'PK': .045, 'Def': .0825}
-				# home/away adjustments
+				FFPG_Arma[int(row[0])] = FFPG[int(row[0])]
+			homeMap = {'QB': .02, 'RB': .0425, 'WR': 0, \
+		                   'TE': .035, 'PK': .045, 'Def': .0825}
+			# home/away adjustments
+			if homeAdjustment:
 				if row[1]['h/a'] == 'h':
 					FFPG[int(row[0])] = (1 + homeMap[pos]) * np.mean(total_points[-win_size:])
-				else:
-					
+				else:					
 					FFPG[int(row[0])] = (1 - homeMap[pos]) * np.mean(total_points[-win_size:])
-				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
-				price[int(row[0])] = np.mean(total_salary[-win_size:])
-				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
-				
+			
+			FFPG[int(row[0])] = np.mean(total_points[-win_size:])
+			price[int(row[0])] = np.mean(total_salary[-win_size:])
+			FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
+			Def_Allowed[int(row[0])] = np.mean(defensive_points[-win_size:])	
 			oppt = defenseMap[oppt]
 			for i in range(len(oppt[0])):
 				if (int(oppt[0][i][0]) == week) and (int(oppt[0][i][1]) == year):
@@ -198,6 +196,7 @@ if __name__ == '__main__':
 					# print oppt[0][i][2 + posMap[pos]-1]
 			total_salary.append(row[1]['FD salary'])
 			unadjusted_points.append(row[1]['FD points'])
+			defensive_points.append(adjMap[pos])
 	for i in range(len(FFPG)):
 		if np.isnan(FFPG[i]):
 			FFPG[i] = 0
@@ -211,6 +210,10 @@ if __name__ == '__main__':
 	data['Std FFPG'] = pd.Series(FDStd)
 	data['FFPGLow'] = pd.Series(FFPG_low)
 	data['FFPGHigh'] = pd.Series(FFPG_high)
+	data['FFPGEWMA'] = pd.Series(FFPG_EWMA)
+	data['FFPGArma'] = pd.Series(FFPG_Arma)
+	data['DefPoints'] = pd.Series(Def_Allowed)
+	# data['RelStrength'] = data['FFPG'] / data['Def_Allowed']
 	'''
 	data['Floor'] =  data['FFPG'] - data['Std FFPG']
 	data['Ceiling'] = data['FFPG'] + data['Std FFPG']
