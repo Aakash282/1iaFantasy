@@ -175,6 +175,7 @@ if __name__ == '__main__':
 				else:
 					
 					FFPG[int(row[0])] = (1 - homeMap[pos]) * np.mean(total_points[-win_size:])
+				FFPG[int(row[0])] = np.mean(total_points[-win_size:])
 				price[int(row[0])] = np.mean(total_salary[-win_size:])
 				FDStd[int(row[0])] = np.std(unadjusted_points[-win_size:])
 				
@@ -188,7 +189,7 @@ if __name__ == '__main__':
 					          'RB'  : oppt[0][i][posMap[pos]+1],
 					          'TE'  : oppt[0][i][posMap[pos]+1],
 					          'WR'  : oppt[0][i][posMap[pos]+1]}
-					normMap = {'Def': 10000.0, 'PK':5.0, 'QB':1.5, \
+					normMap = {'Def': 10.0, 'PK':5.0, 'QB':1.5, \
 					           'RB': 2.0, 'TE': 4.0, 'WR': 6.0}
 					# normMap is used to roughly normalize to vals
 					total_points.append((row[1]['FD points'] + adjMap[pos]/normMap[pos]\
@@ -203,7 +204,6 @@ if __name__ == '__main__':
 		if np.isnan(price[i]):
 			price[i] = 7000
 		if np.isnan(FDStd[i]) or FDStd[i] == 0:
-			# Set to 0 to not give any false ceiling readings
 			FDStd[i] = FFPG[i] ** (.5)
 
 	data['FFPG'] = pd.Series(FFPG)

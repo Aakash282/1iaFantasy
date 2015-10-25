@@ -4,29 +4,24 @@ import numpy as np
 import scipy
 import scipy.optimize
 from matplotlib import pyplot as plt
+import random as rand
 
-lst = ['DaltonAndy', 'EllingtonAndre', 'FreemanDevonta', 'RobinsonAllen', 'MaclinJeremy', 'FitzgeraldLarry', 'EifertTyler']
-lst1 = ['BenjaminTravis', 'JonesJames', "BellLe'Veon", 'GronkowskiRob', 'DaltonAndy', 'LewisDion']
-lst2 = ['BenjaminTravis', 'JonesJames', "BellLe'Veon", 'GronkowskiRob', 'BradyTom', 'LewisDion']
-lst3 = ['BenjaminTravis', 'JonesJames', "BellLe'Veon", 'EifertTyler', 'BradyTom', 'LewisDion']
-lst4 = ['BenjaminTravis', 'JonesJames', 'IvoryChristopher', 'EifertTyler', 'ManningEli', 'LewisDion']
-lst5 = ['BenjaminTravis', 'JonesJames', 'IvoryChristopher', 'EifertTyler', 'NewtonCam', 'LewisDion']
-lotsofteams = [['BradyTom', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'EdelmanJulian', 'DiggsStefon', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'BenjaminTravis', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'MatthewsRishard', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'DiggsStefon', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'IvoryChristopher', 'DeckerEric', 'RobinsonAllen', 'HurnsAllen', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'BenjaminTravis', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'MatthewsRishard', 'GatesAntonio'], ['BradyTom', "BellLe'Veon", 'JohnsonDavid', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'EdelmanJulian', 'BenjaminTravis', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'GreenA.J.', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'MarshallBrandon', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'HurnsAllen', 'GatesAntonio']]
-
-moreTeams = [['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'JonesJames', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'BenjaminTravis', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'RobinsonAllen', 'HurnsAllen', 'GatesAntonio'], ['BradyTom', 'IvoryChristopher', 'JohnsonChris', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'HurnsAllen', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'JonesJames', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'BenjaminTravis', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'MaclinJeremy', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'RobinsonAllen', 'HurnsAllen', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'RobinsonAllen', 'JonesJames', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'RobinsonAllen', 'BenjaminTravis', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'IvoryChristopher', 'EdelmanJulian', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['DaltonAndy', "BellLe'Veon", 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'HurnsAllen', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'EdelmanJulian', 'RobinsonAllen', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'GreenA.J.', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'MarshallBrandon', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'HopkinsDeAndre', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['DaltonAndy', 'IvoryChristopher', 'LewisDion', 'FitzgeraldLarry', 'GreenA.J.', 'RobinsonAllen', 'GatesAntonio'], ['BortlesBlake', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['BortlesBlake', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'MarshallBrandon', 'GatesAntonio'], ['BortlesBlake', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['BortlesBlake', "BellLe'Veon", 'LewisDion', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio'], ['NewtonCam', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['ManningEli', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'DeckerEric', 'RobinsonAllen', 'GatesAntonio'], ['McCownJosh', "BellLe'Veon", 'IvoryChristopher', 'FitzgeraldLarry', 'EdelmanJulian', 'DeckerEric', 'GatesAntonio']]
-
-
-def preFilter(teamLists, cutoff):
-    for team1 in teamLists:
-        for team2 in teamLists:
-            if team1 != team2:
-                return 0
+def loadLineups():
+    lst = []
+    with open(os.getcwd()[:-14] + 'fanduel/NFL/lineups.csv', 'r') as f:
+        a = f.readlines()
+        for elem in a:
+            elem = elem.strip('\n')
+            elem = elem.split(',')
+            elem = [x.strip(' ') for x in elem]
+            lst.append(elem)
+    return lst
         
 def teamScore(teamLists, week, year):
     '''Finds the historical performance of a set of teams  
     at a specified year and week'''
     home = os.getcwd()
-    path = home[:-10] + 'fanduel/computedData.csv'
+    path = home[:-14] + 'fanduel/NFL/computedData.csv'
     # this is the data we want from the upcoming week.  This is used to 
     # determine which teams are competing
     data = pd.DataFrame.from_csv(path, sep = ',')
@@ -50,18 +45,24 @@ def teamScore(teamLists, week, year):
     plt.show()
     
 def weights(teamLists, desiredMean):
+    filterTeams = []
+    for elem in teamLists:
+        filterTeams.append([x.strip() for x in elem])
+    teamLists = filterTeams
     '''gets the weights from a list of possible teams.  In the future, this
     should plot the variance of the portfolio vs the expected score'''
     home = os.getcwd()
-    path = home[:-10] + 'fanduel/computedData.csv'
+    path = home[:-14] + 'fanduel/NFL/computedData.csv'
     # this is the data we want from the upcoming week.  This is used to 
     # determine which teams are competing
     data = pd.DataFrame.from_csv(path, sep = ',')
-    data = filter_table(data, 'Week', 6)
+    data = filter_table(data, 'Week', 7)
     data = filter_table(data, 'Year', 2015) 
     mu = []
+    print 'heh? \n \n'
     for team in teamLists:
         mu.append(expected(team, data))
+    print 'we outchea \n \n'    
     mu = np.array(mu)
     if min(mu) > desiredMean or max(mu) < desiredMean:
         print 'mean changed to', mu.mean()
@@ -94,13 +95,13 @@ def covMatr(teamLists):
     for team in teamLists:
         variances.append(teamStd(team))
     varianceMat = np.outer(variances, variances)
-    print varianceMat
     return np.multiply(corrMat, varianceMat)
 
 
 def expected(playerList, table):
     out = []
     for player in playerList:
+        print player
         tempTable = filter_table(table, 'Name', player)
         out.append(tempTable['FFPG'].values[-1])
     return sum(out)
@@ -108,6 +109,7 @@ def expected(playerList, table):
 def percExpected(playerList, table):
     out = []
     for player in playerList:
+        player = player.strip()
         tempTable = filter_table(table, 'Name', player)
         out.append(tempTable['FFPG'].values[-1])
     out = [x / float(sum(out)) for x in out]
@@ -130,11 +132,11 @@ def teamCorr(list1, list2):
     if list1 == list2:
         return 1
     home = os.getcwd()
-    path = home[:-10] + 'fanduel/computedData.csv'
+    path = home[:-14] + 'fanduel/NFL/computedData.csv'
     # this is the data we want from the upcoming week.  This is used to 
     # determine which teams are competing
     data = pd.DataFrame.from_csv(path, sep = ',')
-    data = filter_table(data, 'Week', 6)
+    data = filter_table(data, 'Week', 7)
     data = filter_table(data, 'Year', 2015)
     percExpected1 = percExpected(list1, data)
     # percExpected2 = percExpected(list2, data)
@@ -152,7 +154,7 @@ def teamStd(player_list):
     position are chosen (ie, 2 rbs or 2 wrs)'''
     
     home = os.getcwd()
-    path = home[:-10] + 'fanduel/2015/week6.csv'
+    path = home[:-14] + 'fanduel/NFL/2015/week7.csv'
     # this is the data we want from the upcoming week.  This is used to 
     # determine which teams are competing
     data = pd.DataFrame.from_csv(path, sep = ';')
@@ -176,8 +178,8 @@ def teamStd(player_list):
               'TE': 3,
               'RB': 5, 
               'QB': 6,
-              'K' : 7,
-              'D' : 8}        
+              'PK' : 7,
+              'Def' : 8}        
     competingTeams = []
     usedTeams = []
     for elem in playerTeam.keys():
@@ -191,11 +193,11 @@ def teamStd(player_list):
     # for each set of teams that are playing each other, both of which you have
     # players in
     # print 'sets of competing teams', len(competingTeams)
-    rawMat = pd.DataFrame.from_csv(os.getcwd()[:-10] + 'fanduel/pointcorr.csv')
+    rawMat = pd.DataFrame.from_csv(os.getcwd()[:-14] + 'fanduel/NFL/pointcorr.csv')
     # loads in the corr matrix as a numpy array of arrays
     corrMat = pd.DataFrame.as_matrix(rawMat)
     totalVariance = 0
-    computedData = pd.DataFrame.from_csv(home[:-10] + 'fanduel/computedData.csv')
+    computedData = pd.DataFrame.from_csv(home[:-14] + 'fanduel/NFL/computedData.csv')
     # this is the table from which I am pulling the variance of each player from
     computedData.sort(['Week', 'Year'])
     # computes the covariance parts of these players that are in games with others
@@ -240,5 +242,30 @@ def filter_table(table, column, entry):
     '''filters the table to only include certain entries'''
     return table[(table[column]) == entry]
 
-
-teamScore(lotsofteams + moreTeams, 6, 2015)
+if __name__ == '__main__':
+    
+    a = loadLineups()
+    lst = weights(a, 201)
+    output = []
+    for i in range(len(lst)):
+        if lst[i] > 0.001:
+            output.append([str(lst[i])] + a[i])
+    with open('portfolio.csv', 'w') as f:
+        for elem in output:
+            f.write(', '.join(elem) + '\n')
+    '''
+    a = loadLineups()
+    print a[0]
+    rand.shuffle(a)
+    sliceSize = 10
+    # i = 4, 5 had problems and were not terminated successfully
+    for i in range(13 * 3):
+        weight = weights(a[i * sliceSize: (i+1) * sliceSize], 183)
+        if type(weight) == type(0):
+            print i
+            continue
+        else:
+            for p in range(len(weight)):
+                if weight[p] > 0.00001:
+                    print weight[p], a[p + (i * sliceSize)]
+    '''                
