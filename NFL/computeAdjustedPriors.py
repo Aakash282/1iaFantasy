@@ -22,7 +22,7 @@ posMap = {'Def' : 1,
 def loadData(years):
 	allData = []
 	home = os.getcwd()
-	home = home[:-10] + 'fanduel/'
+	home = home[:-14] + 'fanduel/NFL/'
 	for year in years: 
 		os.chdir(home + "/%d/" % year)
 		files = os.listdir(os.getcwd())

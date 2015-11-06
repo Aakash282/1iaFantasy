@@ -7,7 +7,7 @@ import time
 import pandas as pd 
 import numpy as np 
 from matplotlib import pyplot as plt 
-home = os.getcwd()[:-10] + 'fanduel/'
+home = os.getcwd()[:-14] + 'fanduel/NFL/'
 teams = {'MIN': 'min', 'MIA': 'mia', 'CAR': 'car', 'ATL': 'atl', 'OAK': 'oak', 'CIN': 'cin', 'NYJ': 'nyj', 'DEN': 'den', 'BAL': 'bal', 'NYG': 'nyg', 'TEN': 'ten', 'NO': 'nor', 'DAL': 'dal', 'NE': 'nwe', 'SEA': 'sea', 'CLE': 'cle', 'TB': 'tam', 'PIT': 'pit', 'STL': 'stl', 'DET': 'det', 'HOU': 'hou', 'GB': 'gnb', 'CHI': 'chi', 'WAS': 'was', 'JAC': 'jac', 'KC': 'kan', 'PHI': 'phi', 'BUF': 'buf', 'IND': 'ind', 'ARI': 'ari', 'SF': 'sfo', 'SD': 'sdg'}
 
 defense = {'CardinalsArizona':'ArizonaDefense',
@@ -43,13 +43,13 @@ defense = {'CardinalsArizona':'ArizonaDefense',
             'TitansTennessee':'TennesseeDefense',
             'RedskinsWashington':'WashingtonDefense'}
 
-data = pd.DataFrame.from_csv(home + 'week6.csv').values
-woy = 6
+data = pd.DataFrame.from_csv(home + 'week7.csv').values
+woy = 7
 guru = []
-c = 31551.000000
+c = 31936.000
 for r in data:
     # Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary
-    if r[9] in ['O', 'D', 'IR']:
+    if r[9] in ['O', 'Def', 'IR']:
         continue
     w = [c, woy]                  # row and week of year
     w.append(2015)                # year
@@ -73,8 +73,8 @@ for r in data:
     w.append(r[5])
     c += 1
     guru.append(w)
-home = os.getcwd()[:-10] + 'fanduel/'
-with open(home + 'week6guru.csv', 'w') as f:
+home = os.getcwd()[:-14] + 'fanduel/NFL/'
+with open(home + 'week7guru.csv', 'w') as f:
     f.write('id;Week;Year;GID;Name;Pos;Team;h/a;Oppt;FD points;FD salary\n')
     for line in guru: 
         print line
