@@ -17,7 +17,7 @@ def loadData(years):
 		os.chdir(home + "/%d/" % year)
 		files = os.listdir(os.getcwd())
 		for f in files:
-			day = pd.DataFrame.from_csv(f, sep=',', index_col=None)
+			day = pd.DataFrame.from_csv(f, sep=',')
 			allData.append(day)
 	os.chdir(home)
 
@@ -28,7 +28,7 @@ def loadData(years):
 if __name__ == '__main__':
 	# Load Data
 	data = loadData(range(2014, 2015))
-
+	#print data
 	# Set Hyper Parameters
 	win_size = 8
 
@@ -40,12 +40,13 @@ if __name__ == '__main__':
 	for player in players:
 		# print player
 		playerData = player[1].sort(['year', 'month', 'day'])
+		# print playerData
 		total_points = [] 
 		total_salary = []
 		for row in playerData.iterrows():
-			# print len(playerData.iterrows())
-			FBPG[int(row[1][0])] = np.mean(total_points[-win_size:])
-			price[int(row[1][0])] = np.mean(total_salary[-win_size:])
+			# print row[1][0]
+			FBPG[int(row[0])] = np.mean(total_points[-win_size:])
+			price[int(row[0])] = np.mean(total_salary[-win_size:])
 			total_points.append(row[1]['FD'])
 			total_salary.append(row[1]['salary'])
 			# print idx, row
@@ -54,9 +55,10 @@ if __name__ == '__main__':
 		if np.isnan(FBPG[i]):
 			FBPG[i] = 0
 		if np.isnan(price[i]):
-			price[i] = 4000
+			price[i] = 3500
 	# print FBPG
 	data['FBPG'] = pd.Series(FBPG)
+	# print data['FBPG']
 	data['Average salary'] = pd.Series(price)
 
 	# players = data.groupby(['name', 'team'])
