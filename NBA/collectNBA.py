@@ -9,7 +9,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 
 # headers
-headers = ['id', 'day', 'month', 'year', 'pos', 'name', 'starter', 'FD', 'salary', 'team', 'opp_team', 'home', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
+headers = ['id', 'day', 'month', 'year', 'pos', 'name', 'starter', 'FD', 'salary', 'team', 'opp_team', 'home', 'score', 'min', 'pt', 'rb', 'as', 'st', 'bl', 'to', 'trey', 'fg', 'ft']
 
 # years for which data is available
 years = range(2014, 2015)
@@ -46,6 +46,7 @@ for y in years:
             url = "http://rotoguru1.com/cgi-bin/hyday.pl?game=fd&mon=%d&day=%d&year=%d" % (m, d, y)
 
             # saving and parsing webpage
+            print url
             filename = wget.download(url)
             with open(filename, 'r') as f: 
                 lines = f.readlines()

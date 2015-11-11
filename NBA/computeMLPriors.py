@@ -8,27 +8,11 @@ import numpy as np
 from matplotlib import pyplot as plt 
 
 
-def loadData(years):
-	allData = []
-	home = os.getcwd()
-	home = home[:-14] + '/fanduel/NBA'
-	c = 0
-	for year in years: 
-		os.chdir(home + "/%d/" % year)
-		files = os.listdir(os.getcwd())
-		for f in files:
-			day = pd.DataFrame.from_csv(f, sep=',', index_col=None)
-			allData.append(day)
-	os.chdir(home)
-
-	allData = pd.concat(allData)
-	os.chdir(home)
-	return allData
-
 if __name__ == '__main__':
 	# Load Data
-	data = loadData(range(2014, 2015))
-
+	home = os.getcwd()[:-14] + 'fanduel/NBA'
+	data = pd.DataFrame.from_csv(home + '/computedData.csv', index_col = 0)
+	data = data.set_index('id')
 	print data
 	# Set Hyper Parameters
 	win_size = 5
@@ -41,10 +25,12 @@ if __name__ == '__main__':
 	players = data.groupby(['name', 'team', 'pos'])
 	for player in players:
 		# print player 
-		playerData = player[1].sort(['year', 'month', 'day'])
+		playerData = player[1].sort_values(by=(['year', 'month', 'day']), ascending = True)
+		#playerData = player[1].sort(['year', 'month', 'day'], ascending = [1, 1, 1])
 		total_points = [] 
 		total_salary = [] 
 		for row in playerData.iterrows():
+			print int(row[0]), 'id? \n'
 			# print len(playerData.iterrows())
 			# FBPG[int(row[1][0])] = np.mean(total_points[-win_size:])
 			# print row[1]['starter']
@@ -53,20 +39,19 @@ if __name__ == '__main__':
 				if len(total_points[-win_size:]) < win_size:
 					toAdd = win_size - len(total_points[-win_size:])
 					missingGames = [0 for i in range(toAdd)]
-					FBPG[int(row[1][0])] = missingGames + total_points[-win_size:] 
+					FBPG[int(row[0])] = missingGames + total_points[-win_size:] 
 				else:
-					FBPG[int(row[1][0])] = total_points[-win_size:]
+					FBPG[int(row[0])] = total_points[-win_size:]
 			else:
-				FBPG[int(row[1][0])] = [0 for k in range(win_size)]
+				FBPG[int(row[0])] = [0 for k in range(win_size)]
 
 			# price[int(row[1][0])] = np.mean(total_salary[-win_size:])
-			total_points.append(row[1]['starter'])
+			total_points.append(row[1]['FD'])
 			# total_salary.append(row[1]['salary'])
 			# print idx, row
 
 	priors = []
 	for i in range(win_size):
-
 		col = [FBPG[j][i] for j in range(len(FBPG))]
 		priors.append(col)
 
@@ -82,5 +67,5 @@ if __name__ == '__main__':
 	# 	print playerData["name"].values
 
 	home = os.getcwd() + '/'
-	data.to_csv(home + 'computedData.csv')
+	data.to_csv(home + 'computedDataML.csv')
 
